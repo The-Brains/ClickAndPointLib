@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+    <head>
+        <!-- META -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0"/>
+        <meta charset="UTF-8"/>
+
+        <title>ClickAndPointLib - Demo</title>
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="style/normalize.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="style/material.light_blue-orange.min.css" />
+        <link href="//fonts.googleapis.com/css?family=Roboto:400,100,500,300italic,500italic,700italic,900,300">
+
+        <link rel="stylesheet" href="./style/main.css" />
+
+        <!-- JS -->
+        <script defer src="js/lib/material.min.js"></script>
+        <script data-main="demo" src="js/lib/require.js"></script>
+    </head>
+    <body scroll="no" style="overflow: hidden">
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+            <header class="mdl-layout__header">
+                <div class="mdl-layout__header-row">
+                    <div class="mdl-layout-spacer"></div>
+                    <!-- Header bar -->
+                </div>
+            </header>
+            <div class="mdl-layout__drawer">
+                <span class="mdl-layout-title">ClickAndPointLib - Demo</span>
+                <!-- Navigation -->
+                <nav class="mdl-navigation">
+                    <!-- TODO -->
+                </nav>
+            </div>
+            <main class="mdl-layout__content" style="height: 100%">
+                <div class="page-content" style="height: 100%">
+                    <div class="game-content">
+                        <div class="CanvasArea is-hidden" style="width:100%; height:100%">
+                            <canvas id="canvas" style="width:100%; height:100%"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </body>
+</html>
