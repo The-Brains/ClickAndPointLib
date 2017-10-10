@@ -18,6 +18,10 @@ define([
     var readFileAsJson = (path) => {
         return readFile(path)
         .then((data) => {
+            if (data !== null && typeof data === 'object') {
+                return data;
+            }
+
             return JSON.parse(data);
         });
     }

@@ -9,7 +9,7 @@ define(
         var mainName = 'app-game';
 
         testWrapper.execTest(mainName, 'should load file properly', function() {
-            var game = new Game('/game-files-examples/test-game-1.json');
+            var game = new Game('./game-files-examples/test-game-1.json');
             return game.start();
         });
     }

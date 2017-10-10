@@ -10,7 +10,7 @@ define(
         var mainName = 'app-game';
 
         testWrapper.execTest(mainName, 'should load file properly', function() {
-            return ReadFile.readFileAsJson('/game-files-examples/scene-1.json')
+            return ReadFile.readFileAsJson('./game-files-examples/scene-1.json')
             .then((data) => {
                 var scene = new Scene('test scene', data);
             })
