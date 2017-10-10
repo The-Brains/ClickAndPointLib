@@ -21,7 +21,6 @@ define([
             if (data !== null && typeof data === 'object') {
                 return data;
             }
-
             return JSON.parse(data);
         });
     }
