@@ -7,12 +7,12 @@ define(
     ],
     function(chai, testWrapper, Scene, ReadFile) {
         var expect = chai.expect;
-        var mainName = 'app-game';
+        var mainName = 'app-scene';
 
-        testWrapper.execTest(mainName, 'should load file properly', function() {
+        testWrapper.execTest(mainName, 'should load data properly', function() {
             return ReadFile.readFileAsJson('./game-files-examples/scene-1.json')
             .then((data) => {
-                var scene = new Scene('test scene', data);
+                var scene = new Scene(null, 'test scene', data);
             })
         });
     }
