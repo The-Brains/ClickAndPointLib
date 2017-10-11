@@ -8,9 +8,9 @@ define([
             document.getElementById('canvas')
         );
 
+        $('.CanvasArea').removeClass('is-hidden');
         game.start()
         .then(() => {
-            $('.CanvasArea').removeClass('is-hidden');
             console.log('App started.');
         });
 });

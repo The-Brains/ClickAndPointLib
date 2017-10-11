@@ -28,6 +28,7 @@ define(function() {
     requirejs([
         // Add your test files here
         'js/tests/app-game-test.js',
+        'js/tests/app-scene-test.js',
         'js/tests/utility-read-file-test.js',
     ]);
 });

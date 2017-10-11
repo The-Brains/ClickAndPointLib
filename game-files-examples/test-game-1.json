@@ -1,8 +1,51 @@
 {
     "scenes": {
         "first": {
-            "name": "Home",
-            "backgroundImg": "/assets/first-background.png"
+            "backgroundImg": "/assets/first-background.png",
+            "interactions": [
+                {
+                    "actions": [
+                        {
+                            "target": "",
+                            "type": "goto"
+                        }
+                    ],
+                    "hidden": true,
+                    "location": {
+                        "description": {
+                            "bottomRightCorner": {
+                                "x": 1760,
+                                "y": 728
+                            },
+                            "topLeftCorner": {
+                                "x": 1675,
+                                "y": 512
+                            }
+                        },
+                        "shape": "square"
+                    }
+                },
+                {
+                    "actions": [
+                        {
+                            "target": "",
+                            "type": "goto"
+                        }
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "center": {
+                                "x": 1030,
+                                "y": 860
+                            },
+                            "radius": 110
+                        },
+                        "shape": "circle"
+                    }
+                }
+            ],
+            "name": "Home"
         }
     },
     "startScene": "first"
