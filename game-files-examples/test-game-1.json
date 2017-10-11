@@ -1,0 +1,9 @@
+{
+    "scenes": {
+        "first": {
+            "name": "Home",
+            "backgroundImg": "/assets/first-background.png"
+        }
+    },
+    "startScene": "first"
+}
