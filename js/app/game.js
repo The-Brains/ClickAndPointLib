@@ -3,56 +3,34 @@ define([
     'lodash',
     '../utility/read-file.js',
     '../utility/check-data.js',
-    './scene.js'
+    './renderer.js',
+    './mouse.js',
+    './scene.js',
 ],
-($, _, ReadFile, CheckData,  Scene) => {
+($, _, ReadFile, CheckData, Renderer, Mouse, Scene) => {
     var Game = function(sourceFile, canvas) {
         var myself = self;
+        var $canvas = null;
+        this.renderer = null;
+
         if (canvas) {
-            this.canvas = canvas;
-            this.$canvas = $(canvas);
-            this.canvasContext = canvas.getContext('2d');
+            var canvas = canvas;
+            $canvas = $(canvas);
+            var canvasContext = canvas.getContext('2d');
+            this.renderer = new Renderer($canvas, canvasContext);
         }
+
+        var offsetX, offsetY;
+
+        this.mouse = new Mouse();
+
         this.sourceFile = sourceFile;
         this.sourceData = null;
         this.scenes = {};
         this.currentScene = null;
 
-        // TODO: Split this rendering into a rendering library
-        var drawImageBackground = (imagePath) => {
-            var img = new Image();
-            img.onload = (source) => {
-                var originalWidth = source.target.naturalWidth;
-                var originalHeight = source.target.naturalHeight;
-                var originalRatio = originalWidth / originalHeight * 1.0;
-
-                var fullHeight = this.$canvas.height();
-                var height = fullHeight;
-                var fullWidth =  this.$canvas.width();
-                var width = fullWidth;
-
-                var ratioWidth = originalWidth / width;
-                var ratioHeight = originalHeight / height;
-                if (ratioWidth > ratioHeight) {
-                    height = width / originalRatio;
-                } else {
-                    width = height * originalRatio;
-                }
-
-                var cornerX = 0;
-                var cornerY = 0;
-
-                if (height < fullHeight) {
-                    cornerY = (fullHeight - height) / 2;
-                }
-                if (width < fullWidth) {
-                    cornerX = (fullWidth - width) / 2;
-                }
-
-                this.canvasContext.drawImage(img, cornerX, cornerY, width, height);
-                console.log('redraw');
-            };
-            img.src = imagePath;
+        this.getName = () => {
+            return 'MainGame';
         }
 
         this.start = () => {
@@ -60,31 +38,52 @@ define([
             .then((data) => {
                 this.sourceData = data;
 
-                CheckData.checkKeys(this.sourceData, ['startScene'], true, 'GameCreation');
+                CheckData.checkKeys(this.sourceData, ['startScene'], true, this.getName());
 
                 _.each(this.sourceData.scenes, (sceneData, key) => {
-                    this.scenes[key] = new Scene(key, sceneData);
+                    this.scenes[key] = new Scene(this, key, sceneData);
                 });
 
-                CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true, 'GameCreation');
+                CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true, this.getName());
 
                 this.currentScene = this.scenes[this.sourceData.startScene];
 
-                return renderCurrentScene();
+                return render();
             });
         };
 
-        var renderCurrentScene = () => {
-            if (!this.canvas) {
-                return;
+        var render = () => {
+            if (!this.renderer) {
+                return Promise.reject('Renderer is not defined');
             }
 
-            drawImageBackground(this.currentScene.getImageBackground())
+            var boundingBox = canvas.getBoundingClientRect();
+            offsetX = boundingBox.left;
+            offsetY = boundingBox.top;
+
+            return this.currentScene.render(this.renderer, this.mouse);
         }
 
-        $(window).resize(_.debounce(renderCurrentScene, 200, {
+        var handleCursorMove = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            mouseX = parseInt(e.clientX - offsetX);
+            mouseY = parseInt(e.clientY - offsetY);
+            this.mouse.registerMouseMove(mouseX, mouseY);
+
+            return this.currentScene.handleCursorMove(this.renderer, this.mouse);
+        }
+
+        $(window).resize(_.debounce(render, 500, {
             maxWait: 1000,
-        }))
+        }));
+
+        if ($canvas) {
+            $canvas.mousemove(_.debounce(handleCursorMove, 150, {
+                maxWait: 200,
+            }));
+        }
     }
 
     return Game;

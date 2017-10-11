@@ -1,4 +1,5 @@
 {
     "name": "example 1",
-    "backgroundImg": "/assets/first-background.png"
+    "backgroundImg": "/assets/first-background.png",
+    "interactions": []
 }

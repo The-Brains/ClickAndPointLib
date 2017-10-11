@@ -18,6 +18,9 @@ define([
     var readFileAsJson = (path) => {
         return readFile(path)
         .then((data) => {
+            if (data !== null && typeof data === 'object' && typeof data !== 'string') {
+                return data;
+            }
             return JSON.parse(data);
         });
     }
