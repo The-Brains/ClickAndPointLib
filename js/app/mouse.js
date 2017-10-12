@@ -8,6 +8,8 @@ define([
         var x = null;
         var y = null;
 
+        var isClicked = false;
+
         this.registerMouseMove = (newX, newY) => {
             x = newX;
             y = newY;
@@ -25,6 +27,13 @@ define([
             return x !== null && y !== null;
         }
 
+        this.registerClick = () => {
+            isClicked = true;
+        }
+        this.registerRelease = () => {
+            isClicked = false;
+        }
+
         this.toString = () => {
             return `Mouse:(${x}, ${y})`;
         }
@@ -34,12 +43,10 @@ define([
         }
 
         this.defaultCursor = () => {
-            console.log('changed cursor to default');
             _setCursor('default');
         }
 
         this.updateCursor = (newCursor) => {
-            console.log('changed cursor to ' + newCursor);
             _setCursor(newCursor);
         }
     }

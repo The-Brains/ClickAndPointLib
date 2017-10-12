@@ -1,12 +1,17 @@
 {
     "scenes": {
+        "fireView": {
+            "backgroundImg": "/assets/the_fire_place.jpg",
+            "interactions": [],
+            "name": "The fire"
+        },
         "first": {
             "backgroundImg": "/assets/first-background.png",
             "interactions": [
                 {
                     "actions": [
                         {
-                            "target": "",
+                            "target": "fireView",
                             "type": "goto"
                         }
                     ],
@@ -28,7 +33,7 @@
                 {
                     "actions": [
                         {
-                            "target": "",
+                            "target": "flowerView",
                             "type": "goto"
                         }
                     ],
@@ -46,6 +51,11 @@
                 }
             ],
             "name": "Home"
+        },
+        "flowerView": {
+            "backgroundImg": "/assets/flower_view.jpg",
+            "interactions": [],
+            "name": "The Flowers"
         }
     },
     "startScene": "first"
