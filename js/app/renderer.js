@@ -21,6 +21,10 @@ define([
             return $canvas;
         }
 
+        this.getCanvas = () => {
+            return canvas;
+        }
+
         this.getContext = () => {
             return canvasContext;
         }

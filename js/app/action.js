@@ -2,11 +2,25 @@ define([
     '../utility/check-data.js',
 ],
 (CheckData) => {
-    var Action = function(parent, data) {
+    var Action = function(parent, key, data) {
+        this.parent = parent;
         var myself = self;
+        var game = null;
 
         this.getName = () => {
-            return parent.getName() + ` - Action`;
+            return parent.getName() + ` - Action '${key}'`;
+        }
+
+        var getGame = () => {
+            if (game) {
+                return game;
+            }
+            var currentParent = parent;
+            while (currentParent.parent) {
+                currentParent = currentParent.parent;
+            }
+            game = currentParent;
+            return getGame();
         }
 
         CheckData.checkKeys(
@@ -20,9 +34,24 @@ define([
         );
 
         var type = data.type;
+        var target = data.target;
 
         this.goto = {
+            checkData: () => {
+                getGame().isValidSceneKey(target, true);
+            },
             hoverCursor: data.hoverCursor || 'pointer',
+            actClickDown: (renderer, mouse, isHover) => {
+                if (isHover) {
+                    return Promise.resolve({
+                        newScene: target,
+                    });
+                }
+                return Promise.resolve({});
+            },
+            actClickUp: (renderer, mouse, isHover) => {
+                return Promise.resolve({});
+            }
         }
 
         var cursorWasChanged = false;
@@ -50,6 +79,15 @@ define([
         this.handleCursorMove = (renderer, mouse, isHover) => {
             return handleUpdate(renderer, mouse, isHover);
         }
+
+        this.handleClickDown = (renderer, mouse, isHover) => {
+            return this[type].actClickDown(renderer, mouse, isHover);
+        }
+        this.handleClickUp = (renderer, mouse, isHover) => {
+            return this[type].actClickUp(renderer, mouse, isHover);
+        }
+
+        this[type].checkData();
     }
 
     return Action;
