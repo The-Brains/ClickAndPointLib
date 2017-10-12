@@ -85,39 +85,38 @@ define([
             });
         }
 
-        this.render = (renderer, mouse) => {
-            return renderBackground(renderer)
-            .then(() => {
-                var promises = _.map(interactions, (interaction) => {
-                    return interaction.render(renderer, mouse);
-                });
-                return Promise.all(promises);
-            })
-            .then((output) => {
-                output = _.flatten(output);
-                // at least one is TRUE
-                if (_.some(output, (a) => {return a.needRedrawScene;})) {
-                    return this.render(renderer, mouse);
-                } else {
-                    return Promise.resolve();
-                }
-            });
-        }
-
-        this.handleCursorMove = (renderer, mouse) => {
+        var handleUpdate = (renderer, mouse, methodName) => {
             var promises = _.map(interactions, (interaction) => {
-                return interaction.handleCursorMove(renderer, mouse);
+                return interaction[methodName](renderer, mouse);
             });
             return Promise.all(promises)
             .then((output) => {
                 output = _.flatten(output);
+                // None is active and at least one was
+                if (_.every(output, (a) => { return !a.isActive; }) &&
+                    _.some(output, (a) => {return a.needDefaultCursor;})) {
+                    mouse.defaultCursor();
+                }
+
                 // at least one is TRUE
                 if (_.some(output, (a) => {return a.needRedrawScene;})) {
                     return this.render(renderer, mouse);
                 } else {
                     return Promise.resolve();
                 }
-            });
+            });;
+        }
+
+        this.render = (renderer, mouse) => {
+            return renderBackground(renderer)
+            .then(() => {
+                return handleUpdate(renderer, mouse, 'render');
+            })
+
+        }
+
+        this.handleCursorMove = (renderer, mouse) => {
+            return handleUpdate(renderer, mouse, 'handleCursorMove');
         }
     }
 

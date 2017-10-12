@@ -28,6 +28,20 @@ define([
         this.toString = () => {
             return `Mouse:(${x}, ${y})`;
         }
+
+        var _setCursor = function(cursor) {
+            document.body.style.cursor = cursor;
+        }
+
+        this.defaultCursor = () => {
+            console.log('changed cursor to default');
+            _setCursor('default');
+        }
+
+        this.updateCursor = (newCursor) => {
+            console.log('changed cursor to ' + newCursor);
+            _setCursor(newCursor);
+        }
     }
 
     return Mouse;

@@ -36,7 +36,7 @@ define([
             return location[methodName](renderer, mouse)
             .then((outputFromLocation) => {
                 var promises = _.map(actions, (action) => {
-                    return action[methodName](renderer, mouse);
+                    return action[methodName](renderer, mouse, outputFromLocation.isInside);
                 });
                 return Promise.all(promises)
                 .then((output) => {

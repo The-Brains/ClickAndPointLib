@@ -19,12 +19,36 @@ define([
             this.getName()
         );
 
-        this.render = (renderer, mouse) => {
-            return Promise.resolve({});
+        var type = data.type;
+
+        this.goto = {
+            hoverCursor: data.hoverCursor || 'pointer',
         }
 
-        this.handleCursorMove = (renderer, mouse) => {
-            return Promise.resolve({});
+        var cursorWasChanged = false;
+
+        var handleUpdate = (renderer, mouse, isHover) => {
+            if (isHover && this[type].hoverCursor !== null) {
+                mouse.updateCursor(this[type].hoverCursor);
+                cursorWasChanged = true;
+            }
+            var data = {
+                needDefaultCursor: !isHover && cursorWasChanged,
+                isActive: cursorWasChanged && isHover,
+            };
+            if (!isHover) {
+                cursorWasChanged = false;
+            }
+
+            return Promise.resolve(data);
+        }
+
+        this.render = (renderer, mouse, isHover) => {
+            return handleUpdate(renderer, mouse, isHover);
+        }
+
+        this.handleCursorMove = (renderer, mouse, isHover) => {
+            return handleUpdate(renderer, mouse, isHover);
         }
     }
 

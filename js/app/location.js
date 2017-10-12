@@ -112,19 +112,28 @@ define([
         }
 
         var handleUpdate = (renderer, mouse) => {
-            if (this[shape].isInside(renderer, mouse)) {
-                wasDrawn = true;
-                return this[shape].draw(renderer, colorInside);
-            } else if (!parent.isHidding()) {
-                wasDrawn = true;
-                return this[shape].draw(renderer, colorDefault);
-            } else {
-                var returnedData = {
-                    needRedrawScene: wasDrawn,
-                };
-                wasDrawn = false;
-                return Promise.resolve(returnedData);
-            }
+            var isInside = this[shape].isInside(renderer, mouse);
+            return Promise.resolve()
+            .then(() => {
+                if (isInside) {
+                    wasDrawn = true;
+                    return this[shape].draw(renderer, colorInside);
+                } else if (!parent.isHidding()) {
+                    wasDrawn = true;
+                    return this[shape].draw(renderer, colorDefault);
+                } else {
+                    var returnedData = {
+                        needRedrawScene: wasDrawn,
+                    };
+                    wasDrawn = false;
+                    return Promise.resolve(returnedData);
+                }
+            })
+            .then((output) => {
+                return _.merge(output, {
+                    isInside: isInside,
+                });
+            });
         }
 
         this.render = (renderer, mouse) => {
