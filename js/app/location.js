@@ -3,6 +3,7 @@ define([
 ],
 (CheckData) => {
     var Location = function(parent, data) {
+        this.parent = parent;
         var myself = self;
 
         this.getName = () => {
@@ -142,6 +143,19 @@ define([
 
         this.handleCursorMove = (renderer, mouse) => {
             return handleUpdate(renderer, mouse);
+        }
+
+        this.handleClickDown = (renderer, mouse) => {
+            var isInside = this[shape].isInside(renderer, mouse);
+            return Promise.resolve({
+                isInside: isInside,
+            });
+        }
+        this.handleClickUp = (renderer, mouse) => {
+            var isInside = this[shape].isInside(renderer, mouse);
+            return Promise.resolve({
+                isInside: isInside,
+            });
         }
 
         this[shape].dataCheck();
