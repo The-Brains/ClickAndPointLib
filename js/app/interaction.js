@@ -5,11 +5,12 @@ define([
     './action.js',
 ],
 (_, CheckData, Location, Action) => {
-    var Interaction = function(parent, data) {
+    var Interaction = function(parent, key, data) {
+        this.parent = parent;
         var myself = self;
 
         this.getName = () => {
-            return parent.getName() + ` - Interaction`;
+            return parent.getName() + ` - Interaction '${key}'`;
         }
 
         CheckData.checkKeys(
@@ -24,8 +25,8 @@ define([
         );
 
         var location = new Location(this, data.location);
-        var actions = _.map(data.actions, (action) => {
-            return new Action(this, action);
+        var actions = _.map(data.actions, (action, index) => {
+            return new Action(this, index, action);
         });
 
         this.isHidding = () => {
@@ -48,9 +49,14 @@ define([
         this.render = (renderer, mouse) => {
             return handleUpdate(renderer, mouse, 'render');
         }
-
         this.handleCursorMove = (renderer, mouse) => {
             return handleUpdate(renderer, mouse, 'handleCursorMove');
+        }
+        this.handleClickDown = (renderer, mouse) => {
+            return handleUpdate(renderer, mouse, 'handleClickDown');
+        }
+        this.handleClickUp = (renderer, mouse) => {
+            return handleUpdate(renderer, mouse, 'handleClickUp');
         }
     }
 
