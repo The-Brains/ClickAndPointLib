@@ -1,12 +1,36 @@
 {
     "scenes": {
         "fireView": {
-            "backgroundImg": "/assets/the_fire_place.jpg",
-            "interactions": [],
+            "backgroundImg": "./assets/the_fire_place.jpg",
+            "interactions": [
+                {
+                    "actions": [
+                        {
+                            "target": "first",
+                            "type": "goto"
+                        }
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "bottomRightCorner": {
+                                "x": 300,
+                                "y": 300
+                            },
+                            "image": "./assets/back_icon.png",
+                            "topLeftCorner": {
+                                "x": 100,
+                                "y": 100
+                            }
+                        },
+                        "shape": "icon"
+                    }
+                }
+            ],
             "name": "The fire"
         },
         "first": {
-            "backgroundImg": "/assets/first-background.png",
+            "backgroundImg": "./assets/first-background.png",
             "interactions": [
                 {
                     "actions": [
@@ -53,8 +77,32 @@
             "name": "Home"
         },
         "flowerView": {
-            "backgroundImg": "/assets/flower_view.jpg",
-            "interactions": [],
+            "backgroundImg": "./assets/flower_view.jpg",
+            "interactions": [
+                {
+                    "actions": [
+                        {
+                            "target": "first",
+                            "type": "goto"
+                        }
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "bottomRightCorner": {
+                                "x": 150,
+                                "y": 150
+                            },
+                            "image": "./assets/back_icon.png",
+                            "topLeftCorner": {
+                                "x": 50,
+                                "y": 50
+                            }
+                        },
+                        "shape": "icon"
+                    }
+                }
+            ],
             "name": "The Flowers"
         }
     },
