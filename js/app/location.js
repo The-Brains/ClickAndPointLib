@@ -5,9 +5,10 @@ define([
     var Location = function(parent, data) {
         this.parent = parent;
         var myself = self;
+        var shape = data.shape;
 
         this.getName = () => {
-            return parent.getName() + ` - Location`;
+            return parent.getName() + ` - Location ${shape}`;
         }
 
         CheckData.checkKeys(
@@ -20,7 +21,6 @@ define([
             this.getName()
         );
 
-        var shape = data.shape;
         var description = data.description;
         var colorInside = 'blue';
         var colorDefault = 'black';
@@ -39,7 +39,7 @@ define([
                         'topLeftCorner.y',
                     ],
                     true,
-                    this.getName() + ' - Square'
+                    this.getName()
                 );
             },
             draw: (renderer, color) => {
@@ -85,7 +85,7 @@ define([
                         'radius',
                     ],
                     true,
-                    this.getName() + ' - Circle'
+                    this.getName()
                 );
             },
             draw: (renderer, color) => {
@@ -109,6 +109,47 @@ define([
                 var radius = renderer.convertValueToBackground(description.radius);
                 return Math.pow(mouse.getX() - center.x, 2) + Math.pow(mouse.getY() - center.y, 2)
                     < Math.pow(radius, 2);
+            },
+        }
+
+        this.icon = {
+            dataCheck: () => {
+                this.square.dataCheck();
+                CheckData.checkKeys(
+                    description,
+                    [
+                        'image',
+                    ],
+                    true,
+                    this.getName()
+                );
+            },
+            draw: (renderer, color) => {
+                return new Promise((resolve) => {
+                    var topLeftCorner = renderer.convertCoordonateToBackground(description.topLeftCorner);
+                    var bottomRightCorner = renderer.convertCoordonateToBackground(description.bottomRightCorner);
+                    var img = new Image();
+                    var $canvas = renderer.get$Canvas();
+                    var canvasContext = renderer.getContext();
+
+                    img.onload = (source) => {
+                        var originalWidth = source.target.naturalWidth;
+                        var originalHeight = source.target.naturalHeight;
+                        var originalRatio = originalWidth / originalHeight * 1.0;
+
+                        canvasContext.drawImage(img,
+                            topLeftCorner.x,
+                            topLeftCorner.y,
+                            bottomRightCorner.x - topLeftCorner.x,
+                            bottomRightCorner.y - topLeftCorner.y,
+                        );
+                        resolve();
+                    };
+                    img.src = description.image;
+                });
+            },
+            isInside: (renderer, mouse) => {
+                return this.square.isInside(renderer, mouse);
             },
         }
 
