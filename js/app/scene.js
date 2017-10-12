@@ -5,13 +5,14 @@ define([
 ],
 (_, CheckData, Interaction) => {
     var Scene = function(parent, key, data) {
+        this.parent = parent;
         var myself = self;
 
         this.getName = () => {
             if (parent) {
-                return parent.getName() + ` - Scene ${key}`;
+                return parent.getName() + ` - Scene '${key}'`;
             } else {
-                return `Scene ${key}`;
+                return `Scene '${key}'`;
             }
         }
 
@@ -29,8 +30,8 @@ define([
         var name = data.name;
         var key = key;
         var backgroundImg = data.backgroundImg;
-        var interactions = _.map(data.interactions, (interaction) => {
-            return new Interaction(this, interaction);
+        var interactions = _.map(data.interactions, (interaction, index) => {
+            return new Interaction(this, index, interaction);
         });
 
         this.getImageBackground = () => {
@@ -102,7 +103,7 @@ define([
                 if (_.some(output, (a) => {return a.needRedrawScene;})) {
                     return this.render(renderer, mouse);
                 } else {
-                    return Promise.resolve();
+                    return Promise.resolve(output);
                 }
             });;
         }
@@ -117,6 +118,20 @@ define([
 
         this.handleCursorMove = (renderer, mouse) => {
             return handleUpdate(renderer, mouse, 'handleCursorMove');
+        }
+
+        this.handleClickDown = (renderer, mouse) => {
+            var promises = _.map(interactions, (interaction) => {
+                return interaction.handleClickDown(renderer, mouse);
+            });
+            return Promise.all(promises)
+        }
+
+        this.handleClickUp = (renderer, mouse) => {
+            var promises = _.map(interactions, (interaction) => {
+                return interaction.handleClickUp(renderer, mouse);
+            });
+            return Promise.all(promises)
         }
     }
 
