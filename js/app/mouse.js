@@ -52,4 +52,4 @@ define([
     }
 
     return Mouse;
-})
+});

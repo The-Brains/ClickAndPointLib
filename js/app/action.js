@@ -91,4 +91,4 @@ define([
     }
 
     return Action;
-})
+});
