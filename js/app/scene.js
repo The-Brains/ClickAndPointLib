@@ -136,4 +136,4 @@ define([
     }
 
     return Scene;
-})
+});

@@ -8,9 +8,22 @@ define([
     var Interaction = function(parent, key, data) {
         this.parent = parent;
         var myself = self;
+        var game = null;
 
         this.getName = () => {
             return parent.getName() + ` - Interaction '${key}'`;
+        }
+
+        var getGame = () => {
+            if (game) {
+                return game;
+            }
+            var currentParent = parent;
+            while (currentParent.parent) {
+                currentParent = currentParent.parent;
+            }
+            game = currentParent;
+            return getGame();
         }
 
         CheckData.checkKeys(
@@ -25,8 +38,13 @@ define([
         );
 
         var location = new Location(this, data.location);
-        var actions = _.map(data.actions, (action, index) => {
-            return new Action(this, index, action);
+        var actions = _.flatMap(data.actions, (action, index) => {
+            if (typeof action === 'string') {
+                var actions = getGame().getActions(action);
+                return actions;
+            } else {
+                return new Action(this, index, action);
+            }
         });
 
         this.isHidding = () => {
@@ -61,4 +79,4 @@ define([
     }
 
     return Interaction;
-})
+});

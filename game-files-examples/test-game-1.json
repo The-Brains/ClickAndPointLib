@@ -1,14 +1,21 @@
 {
+    "globalActions": {
+        "goingHome": {
+            "actions": [
+                {
+                    "target": "first",
+                    "type": "goto"
+                }
+            ]
+        }
+    },
     "scenes": {
         "fireView": {
             "backgroundImg": "./assets/the_fire_place.jpg",
             "interactions": [
                 {
                     "actions": [
-                        {
-                            "target": "first",
-                            "type": "goto"
-                        }
+                        "goingHome"
                     ],
                     "hidden": false,
                     "location": {
@@ -81,10 +88,7 @@
             "interactions": [
                 {
                     "actions": [
-                        {
-                            "target": "first",
-                            "type": "goto"
-                        }
+                        "goingHome"
                     ],
                     "hidden": false,
                     "location": {

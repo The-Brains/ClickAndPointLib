@@ -51,4 +51,4 @@ define([
     }
 
     return Renderer;
-})
+});

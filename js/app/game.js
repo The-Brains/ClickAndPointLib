@@ -6,8 +6,9 @@ define([
     './renderer.js',
     './mouse.js',
     './scene.js',
+    './action.js',
 ],
-($, _, ReadFile, CheckData, Renderer, Mouse, Scene) => {
+($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action) => {
     var Game = function(sourceFile, canvas) {
         var myself = self;
         var $canvas = null;
@@ -29,10 +30,21 @@ define([
         this.sourceFile = sourceFile;
         this.sourceData = null;
         this.scenes = {};
+        this.globalActions = {};
         this.currentScene = null;
 
         this.getName = () => {
             return 'MainGame';
+        }
+
+        this.getActions = (actionName) => {
+            var result = _.has(this.globalActions, actionName);
+
+            if (!result) {
+                throw `[MISSING ACTION] The action '${actionName}' cannot be find.`;
+            }
+
+            return this.globalActions[actionName];
         }
 
         this.start = () => {
@@ -45,15 +57,36 @@ define([
 
                 backgroundColor = this.sourceData.backgroundColor || 'black';
 
+                // init actions
+                _.each(this.sourceData.globalActions, (actionData, key) => {
+                    CheckData.checkKeys(actionData, ['actions'], true,
+                        this.getName() + ` - globalActions - ${key}`);
+
+                    this.globalActions[key] = [];
+                });
+
+                // init scenes
                 _.each(this.sourceData.scenes, (sceneData, key) => {
                     this.scenes[key] = {};
                 });
 
+
+                // create Global Actions
+                 _.each(this.sourceData.globalActions, (actionData, key) => {
+                    _.each(actionData.actions, (action, index) => {
+                        this.globalActions[key].push(new Action(this, `${key}-${index}` ,action));
+                    });
+                });
+                ////
+
+
+                // Create scenes
                 _.each(this.sourceData.scenes, (sceneData, key) => {
                     this.scenes[key] = new Scene(this, key, sceneData);
                 });
-
-                CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true, this.getName());
+                CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true,
+                    `The scenes are missing first scene named '${this.sourceData.startScene}'`);
+                ////
 
                 return changeScene(this.sourceData.startScene)
                 .then(() => {
@@ -152,4 +185,4 @@ define([
     }
 
     return Game;
-})
+});
