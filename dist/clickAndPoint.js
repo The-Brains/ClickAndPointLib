@@ -117,8 +117,13 @@ ClickAndPointLib.define('app/renderer.js',[
     }
 
     return Renderer;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 ClickAndPointLib.define('app/mouse.js',[
     '../utility/check-data.js',
 ],
@@ -173,8 +178,13 @@ ClickAndPointLib.define('app/mouse.js',[
     }
 
     return Mouse;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 ClickAndPointLib.define('app/location.js',[
     '../utility/check-data.js',
 ],
@@ -380,8 +390,13 @@ ClickAndPointLib.define('app/location.js',[
     }
 
     return Location;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 ClickAndPointLib.define('app/action.js',[
     '../utility/check-data.js',
 ],
@@ -475,8 +490,13 @@ ClickAndPointLib.define('app/action.js',[
     }
 
     return Action;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 ClickAndPointLib.define('app/interaction.js',[
     'lodash',
     '../utility/check-data.js',
@@ -487,12 +507,16 @@ ClickAndPointLib.define('app/interaction.js',[
     var Interaction = function(parent, key, data) {
         this.parent = parent;
         var myself = self;
+<<<<<<< HEAD
         var game = null;
+=======
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 
         this.getName = () => {
             return parent.getName() + ` - Interaction '${key}'`;
         }
 
+<<<<<<< HEAD
         var getGame = () => {
             if (game) {
                 return game;
@@ -505,6 +529,8 @@ ClickAndPointLib.define('app/interaction.js',[
             return getGame();
         }
 
+=======
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
         CheckData.checkKeys(
             data,
             [
@@ -517,6 +543,7 @@ ClickAndPointLib.define('app/interaction.js',[
         );
 
         var location = new Location(this, data.location);
+<<<<<<< HEAD
         var actions = _.flatMap(data.actions, (action, index) => {
             if (typeof action === 'string') {
                 var actions = getGame().getActions(action);
@@ -524,6 +551,10 @@ ClickAndPointLib.define('app/interaction.js',[
             } else {
                 return new Action(this, index, action);
             }
+=======
+        var actions = _.map(data.actions, (action, index) => {
+            return new Action(this, index, action);
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
         });
 
         this.isHidding = () => {
@@ -558,8 +589,13 @@ ClickAndPointLib.define('app/interaction.js',[
     }
 
     return Interaction;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 ClickAndPointLib.define('app/scene.js',[
     'lodash',
     '../utility/check-data.js',
@@ -698,8 +734,13 @@ ClickAndPointLib.define('app/scene.js',[
     }
 
     return Scene;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 ClickAndPointLib.define('app/game',[
     'jquery',
     'lodash',
@@ -708,9 +749,14 @@ ClickAndPointLib.define('app/game',[
     './renderer.js',
     './mouse.js',
     './scene.js',
+<<<<<<< HEAD
     './action.js',
 ],
 ($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action) => {
+=======
+],
+($, _, ReadFile, CheckData, Renderer, Mouse, Scene) => {
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
     var Game = function(sourceFile, canvas) {
         var myself = self;
         var $canvas = null;
@@ -732,13 +778,17 @@ ClickAndPointLib.define('app/game',[
         this.sourceFile = sourceFile;
         this.sourceData = null;
         this.scenes = {};
+<<<<<<< HEAD
         this.globalActions = {};
+=======
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
         this.currentScene = null;
 
         this.getName = () => {
             return 'MainGame';
         }
 
+<<<<<<< HEAD
         this.getActions = (actionName) => {
             var result = _.has(this.globalActions, actionName);
 
@@ -749,6 +799,8 @@ ClickAndPointLib.define('app/game',[
             return this.globalActions[actionName];
         }
 
+=======
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
         this.start = () => {
             return ReadFile.readFileAsJson(sourceFile)
             .then((data) => {
@@ -759,6 +811,7 @@ ClickAndPointLib.define('app/game',[
 
                 backgroundColor = this.sourceData.backgroundColor || 'black';
 
+<<<<<<< HEAD
                 // init actions
                 _.each(this.sourceData.globalActions, (actionData, key) => {
                     CheckData.checkKeys(actionData, ['actions'], true,
@@ -768,10 +821,13 @@ ClickAndPointLib.define('app/game',[
                 });
 
                 // init scenes
+=======
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
                 _.each(this.sourceData.scenes, (sceneData, key) => {
                     this.scenes[key] = {};
                 });
 
+<<<<<<< HEAD
 
                 // create Global Actions
                  _.each(this.sourceData.globalActions, (actionData, key) => {
@@ -789,6 +845,13 @@ ClickAndPointLib.define('app/game',[
                 CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true,
                     `The scenes are missing first scene named '${this.sourceData.startScene}'`);
                 ////
+=======
+                _.each(this.sourceData.scenes, (sceneData, key) => {
+                    this.scenes[key] = new Scene(this, key, sceneData);
+                });
+
+                CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true, this.getName());
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 
                 return changeScene(this.sourceData.startScene)
                 .then(() => {
@@ -887,6 +950,11 @@ ClickAndPointLib.define('app/game',[
     }
 
     return Game;
+<<<<<<< HEAD
 });
 
+=======
+})
+;
+>>>>>>> 726be7d9ed2b85184e399b182242e1fa89c1b4e5
 }());
