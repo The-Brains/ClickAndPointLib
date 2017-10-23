@@ -41,6 +41,12 @@ define([
                     true,
                     this.getName()
                 );
+                if (description.topLeftCorner.x >= description.bottomRightCorner.x) {
+                    throw `[${this.getName()}] The topLeftCorner.x is bigger than bottomRightCorner.x`;
+                }
+                if (description.topLeftCorner.y >= description.bottomRightCorner.y) {
+                    throw `[${this.getName()}] The topLeftCorner.y is bigger than bottomRightCorner.y`;
+                }
             },
             draw: (renderer, color) => {
                 var topLeftCorner = renderer.convertCoordonateToBackground(description.topLeftCorner);

@@ -3,10 +3,25 @@
         "goingHome": {
             "actions": [
                 {
+                    "hoverCursor": "zoom-out",
                     "target": "first",
                     "type": "goto"
                 }
             ]
+        },
+        "takeDocument1": {
+            "actions": [
+                {
+                    "target": "document1",
+                    "type": "take"
+                }
+            ]
+        }
+    },
+    "items": {
+        "document1": {
+            "description": "This is a very cool document !",
+            "icon": "./assets/document1.png"
         }
     },
     "scenes": {
@@ -28,6 +43,26 @@
                             "topLeftCorner": {
                                 "x": 100,
                                 "y": 100
+                            }
+                        },
+                        "shape": "icon"
+                    }
+                },
+                {
+                    "actions": [
+                        "takeDocument1"
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "bottomRightCorner": {
+                                "x": 1200,
+                                "y": 1225
+                            },
+                            "image": "./assets/document1.png",
+                            "topLeftCorner": {
+                                "x": 1100,
+                                "y": 1100
                             }
                         },
                         "shape": "icon"
@@ -110,5 +145,5 @@
             "name": "The Flowers"
         }
     },
-    "startScene": "first"
+    "startScene": "fireView"
 }

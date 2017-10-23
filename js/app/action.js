@@ -1,11 +1,13 @@
 define([
+    'lodash',
     '../utility/check-data.js',
 ],
-(CheckData) => {
+(_, CheckData) => {
     var Action = function(parent, key, data) {
         this.parent = parent;
         var myself = self;
         var game = null;
+        var cursorWasChanged = false;
 
         this.getName = () => {
             return parent.getName() + ` - Action '${key}'`;
@@ -36,29 +38,50 @@ define([
         var type = data.type;
         var target = data.target;
 
-        this.goto = {
-            checkData: () => {
-                getGame().isValidSceneKey(target, true);
+        this.validType = {
+            goto: {
+                checkData: () => {
+                    getGame().isValidSceneKey(target, true);
+                },
+                hoverCursor: data.hoverCursor || 'zoom-in',
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            newScene: target,
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => { return true; }
             },
-            hoverCursor: data.hoverCursor || 'pointer',
-            actClickDown: (renderer, mouse, isHover) => {
-                if (isHover) {
-                    return Promise.resolve({
-                        newScene: target,
-                    });
+            take: {
+                checkData: () => {
+                    getGame().isValidItemKey(target, true);
+                },
+                hoverCursor: data.hoverCursor || 'pointer',
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            takeItem: target,
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => {
+                    return !getGame().isItemOwned(target);
                 }
-                return Promise.resolve({});
-            },
-            actClickUp: (renderer, mouse, isHover) => {
-                return Promise.resolve({});
             }
-        }
-
-        var cursorWasChanged = false;
+        };
 
         var handleUpdate = (renderer, mouse, isHover) => {
-            if (isHover && this[type].hoverCursor !== null) {
-                mouse.updateCursor(this[type].hoverCursor);
+            if (isHover && this.validType[type].hoverCursor !== null) {
+                mouse.updateCursor(this.validType[type].hoverCursor);
                 cursorWasChanged = true;
             }
             var data = {
@@ -72,6 +95,10 @@ define([
             return Promise.resolve(data);
         }
 
+        this.shouldBeShown = () => {
+            return this.validType[type].shouldBeShown();
+        }
+
         this.render = (renderer, mouse, isHover) => {
             return handleUpdate(renderer, mouse, isHover);
         }
@@ -81,13 +108,17 @@ define([
         }
 
         this.handleClickDown = (renderer, mouse, isHover) => {
-            return this[type].actClickDown(renderer, mouse, isHover);
+            return this.validType[type].actClickDown(renderer, mouse, isHover);
         }
         this.handleClickUp = (renderer, mouse, isHover) => {
-            return this[type].actClickUp(renderer, mouse, isHover);
+            return this.validType[type].actClickUp(renderer, mouse, isHover);
         }
 
-        this[type].checkData();
+        if (!_.has(this.validType, type)) {
+            throw `The action type '${type}' is not valid.`;
+        }
+
+        this.validType[type].checkData();
     }
 
     return Action;

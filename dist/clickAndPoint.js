@@ -218,6 +218,12 @@ ClickAndPointLib.define('app/location.js',[
                     true,
                     this.getName()
                 );
+                if (description.topLeftCorner.x >= description.bottomRightCorner.x) {
+                    throw `[${this.getName()}] The topLeftCorner.x is bigger than bottomRightCorner.x`;
+                }
+                if (description.topLeftCorner.y >= description.bottomRightCorner.y) {
+                    throw `[${this.getName()}] The topLeftCorner.y is bigger than bottomRightCorner.y`;
+                }
             },
             draw: (renderer, color) => {
                 var topLeftCorner = renderer.convertCoordonateToBackground(description.topLeftCorner);
@@ -383,13 +389,15 @@ ClickAndPointLib.define('app/location.js',[
 });
 
 ClickAndPointLib.define('app/action.js',[
+    'lodash',
     '../utility/check-data.js',
 ],
-(CheckData) => {
+(_, CheckData) => {
     var Action = function(parent, key, data) {
         this.parent = parent;
         var myself = self;
         var game = null;
+        var cursorWasChanged = false;
 
         this.getName = () => {
             return parent.getName() + ` - Action '${key}'`;
@@ -420,29 +428,50 @@ ClickAndPointLib.define('app/action.js',[
         var type = data.type;
         var target = data.target;
 
-        this.goto = {
-            checkData: () => {
-                getGame().isValidSceneKey(target, true);
+        this.validType = {
+            goto: {
+                checkData: () => {
+                    getGame().isValidSceneKey(target, true);
+                },
+                hoverCursor: data.hoverCursor || 'zoom-in',
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            newScene: target,
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => { return true; }
             },
-            hoverCursor: data.hoverCursor || 'pointer',
-            actClickDown: (renderer, mouse, isHover) => {
-                if (isHover) {
-                    return Promise.resolve({
-                        newScene: target,
-                    });
+            take: {
+                checkData: () => {
+                    getGame().isValidItemKey(target, true);
+                },
+                hoverCursor: data.hoverCursor || 'pointer',
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            takeItem: target,
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => {
+                    return !getGame().isItemOwned(target);
                 }
-                return Promise.resolve({});
-            },
-            actClickUp: (renderer, mouse, isHover) => {
-                return Promise.resolve({});
             }
-        }
-
-        var cursorWasChanged = false;
+        };
 
         var handleUpdate = (renderer, mouse, isHover) => {
-            if (isHover && this[type].hoverCursor !== null) {
-                mouse.updateCursor(this[type].hoverCursor);
+            if (isHover && this.validType[type].hoverCursor !== null) {
+                mouse.updateCursor(this.validType[type].hoverCursor);
                 cursorWasChanged = true;
             }
             var data = {
@@ -456,6 +485,10 @@ ClickAndPointLib.define('app/action.js',[
             return Promise.resolve(data);
         }
 
+        this.shouldBeShown = () => {
+            return this.validType[type].shouldBeShown();
+        }
+
         this.render = (renderer, mouse, isHover) => {
             return handleUpdate(renderer, mouse, isHover);
         }
@@ -465,13 +498,17 @@ ClickAndPointLib.define('app/action.js',[
         }
 
         this.handleClickDown = (renderer, mouse, isHover) => {
-            return this[type].actClickDown(renderer, mouse, isHover);
+            return this.validType[type].actClickDown(renderer, mouse, isHover);
         }
         this.handleClickUp = (renderer, mouse, isHover) => {
-            return this[type].actClickUp(renderer, mouse, isHover);
+            return this.validType[type].actClickUp(renderer, mouse, isHover);
         }
 
-        this[type].checkData();
+        if (!_.has(this.validType, type)) {
+            throw `The action type '${type}' is not valid.`;
+        }
+
+        this.validType[type].checkData();
     }
 
     return Action;
@@ -530,7 +567,17 @@ ClickAndPointLib.define('app/interaction.js',[
             return data.hidden;
         }
 
+        this.exists = () => {
+            return _.reduce(actions, function(acc, action) {
+                return acc || action.shouldBeShown();
+            }, false);
+        }
+
         var handleUpdate = (renderer, mouse, methodName) => {
+            if (!this.exists()) {
+                return Promise.resolve({});
+            }
+
             return location[methodName](renderer, mouse)
             .then((outputFromLocation) => {
                 var promises = _.map(actions, (action) => {
@@ -700,6 +747,45 @@ ClickAndPointLib.define('app/scene.js',[
     return Scene;
 });
 
+ClickAndPointLib.define('app/item.js',[
+    '../utility/check-data.js',
+],
+(CheckData) => {
+    var Item = function(parent, key, data) {
+        this.parent = parent;
+        var myself = self;
+        var game = null;
+
+        this.getName = () => {
+            return parent.getName() + ` - Item '${key}'`;
+        }
+
+        var getGame = () => {
+            if (game) {
+                return game;
+            }
+            var currentParent = parent;
+            while (currentParent.parent) {
+                currentParent = currentParent.parent;
+            }
+            game = currentParent;
+            return getGame();
+        }
+
+        CheckData.checkKeys(
+            data,
+            [
+                'description',
+                'icon',
+            ],
+            true,
+            this.getName()
+        );
+    }
+
+    return Item;
+});
+
 ClickAndPointLib.define('app/game',[
     'jquery',
     'lodash',
@@ -709,8 +795,9 @@ ClickAndPointLib.define('app/game',[
     './mouse.js',
     './scene.js',
     './action.js',
+    './item.js',
 ],
-($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action) => {
+($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action, Item) => {
     var Game = function(sourceFile, canvas) {
         var myself = self;
         var $canvas = null;
@@ -734,6 +821,7 @@ ClickAndPointLib.define('app/game',[
         this.scenes = {};
         this.globalActions = {};
         this.currentScene = null;
+        this.items = {};
 
         this.getName = () => {
             return 'MainGame';
@@ -754,8 +842,17 @@ ClickAndPointLib.define('app/game',[
             .then((data) => {
                 this.sourceData = data;
 
-                CheckData.checkKeys(this.sourceData, ['startScene', 'scenes'],
-                    true, this.getName());
+                CheckData.checkKeys(
+                    this.sourceData,
+                    [
+                        'startScene',
+                        'scenes',
+                        'items',
+                        'globalActions'
+                    ],
+                    true,
+                    this.getName()
+                );
 
                 backgroundColor = this.sourceData.backgroundColor || 'black';
 
@@ -772,6 +869,11 @@ ClickAndPointLib.define('app/game',[
                     this.scenes[key] = {};
                 });
 
+                // Init Items
+                _.each(this.sourceData.items, (item, key) => {
+                    this.items[key] = {};
+                });
+
 
                 // create Global Actions
                  _.each(this.sourceData.globalActions, (actionData, key) => {
@@ -781,7 +883,6 @@ ClickAndPointLib.define('app/game',[
                 });
                 ////
 
-
                 // Create scenes
                 _.each(this.sourceData.scenes, (sceneData, key) => {
                     this.scenes[key] = new Scene(this, key, sceneData);
@@ -789,6 +890,11 @@ ClickAndPointLib.define('app/game',[
                 CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true,
                     `The scenes are missing first scene named '${this.sourceData.startScene}'`);
                 ////
+
+                // Create items
+                _.each(this.sourceData.items, (item, key) => {
+                    this.items[key] = new Item(this, key, item);
+                });
 
                 return changeScene(this.sourceData.startScene)
                 .then(() => {
@@ -817,6 +923,21 @@ ClickAndPointLib.define('app/game',[
             return result;
         }
 
+        this.isValidItemKey = (itemKey, raise=false) => {
+            var result = _.has(this.items, itemKey);
+
+            if (!result && raise) {
+                throw `[MISSING ITEMS] The item '${itemKey}' cannot be find.`;
+            }
+
+            return result;
+        }
+
+        this.isItemOwned = (itemKey) => {
+            this.isValidItemKey(itemKey, true);
+            return this.items[itemKey].owned;
+        }
+
         var resetCanvas = () => {
             var canvas = this.renderer.getCanvas();
             var context = this.renderer.getContext();
@@ -830,6 +951,13 @@ ClickAndPointLib.define('app/game',[
 
             this.currentScene = this.scenes[sceneKey];
             this.mouse.defaultCursor();
+            return render();
+        }
+
+        var takeItem = (itemKey) => {
+            this.isValidItemKey(itemKey, true);
+            this.items[itemKey].owned = true;
+            this.mouse.updateCursor('default');
             return render();
         }
 
@@ -870,8 +998,12 @@ ClickAndPointLib.define('app/game',[
             .then((output) => {
                 output = _.flatten(output);
                 var newScene = _.find(output, 'newScene');
+                var takenItem = _.find(output, 'takeItem');
                 if (newScene) {
                     return changeScene(newScene.newScene);
+                }
+                if (takenItem) {
+                    return takeItem(takenItem.takeItem);
                 }
             });
         }
