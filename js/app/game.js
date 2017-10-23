@@ -7,8 +7,9 @@ define([
     './mouse.js',
     './scene.js',
     './action.js',
+    './item.js',
 ],
-($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action) => {
+($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action, Item) => {
     var Game = function(sourceFile, canvas) {
         var myself = self;
         var $canvas = null;
@@ -32,6 +33,7 @@ define([
         this.scenes = {};
         this.globalActions = {};
         this.currentScene = null;
+        this.items = {};
 
         this.getName = () => {
             return 'MainGame';
@@ -52,8 +54,17 @@ define([
             .then((data) => {
                 this.sourceData = data;
 
-                CheckData.checkKeys(this.sourceData, ['startScene', 'scenes'],
-                    true, this.getName());
+                CheckData.checkKeys(
+                    this.sourceData,
+                    [
+                        'startScene',
+                        'scenes',
+                        'items',
+                        'globalActions'
+                    ],
+                    true,
+                    this.getName()
+                );
 
                 backgroundColor = this.sourceData.backgroundColor || 'black';
 
@@ -70,6 +81,11 @@ define([
                     this.scenes[key] = {};
                 });
 
+                // Init Items
+                _.each(this.sourceData.items, (item, key) => {
+                    this.items[key] = {};
+                });
+
 
                 // create Global Actions
                  _.each(this.sourceData.globalActions, (actionData, key) => {
@@ -79,7 +95,6 @@ define([
                 });
                 ////
 
-
                 // Create scenes
                 _.each(this.sourceData.scenes, (sceneData, key) => {
                     this.scenes[key] = new Scene(this, key, sceneData);
@@ -87,6 +102,11 @@ define([
                 CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true,
                     `The scenes are missing first scene named '${this.sourceData.startScene}'`);
                 ////
+
+                // Create items
+                _.each(this.sourceData.items, (item, key) => {
+                    this.items[key] = new Item(this, key, item);
+                });
 
                 return changeScene(this.sourceData.startScene)
                 .then(() => {
@@ -115,6 +135,21 @@ define([
             return result;
         }
 
+        this.isValidItemKey = (itemKey, raise=false) => {
+            var result = _.has(this.items, itemKey);
+
+            if (!result && raise) {
+                throw `[MISSING ITEMS] The item '${itemKey}' cannot be find.`;
+            }
+
+            return result;
+        }
+
+        this.isItemOwned = (itemKey) => {
+            this.isValidItemKey(itemKey, true);
+            return this.items[itemKey].owned;
+        }
+
         var resetCanvas = () => {
             var canvas = this.renderer.getCanvas();
             var context = this.renderer.getContext();
@@ -128,6 +163,13 @@ define([
 
             this.currentScene = this.scenes[sceneKey];
             this.mouse.defaultCursor();
+            return render();
+        }
+
+        var takeItem = (itemKey) => {
+            this.isValidItemKey(itemKey, true);
+            this.items[itemKey].owned = true;
+            this.mouse.updateCursor('default');
             return render();
         }
 
@@ -168,8 +210,12 @@ define([
             .then((output) => {
                 output = _.flatten(output);
                 var newScene = _.find(output, 'newScene');
+                var takenItem = _.find(output, 'takeItem');
                 if (newScene) {
                     return changeScene(newScene.newScene);
+                }
+                if (takenItem) {
+                    return takeItem(takenItem.takeItem);
                 }
             });
         }

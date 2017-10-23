@@ -51,7 +51,17 @@ define([
             return data.hidden;
         }
 
+        this.exists = () => {
+            return _.reduce(actions, function(acc, action) {
+                return acc || action.shouldBeShown();
+            }, false);
+        }
+
         var handleUpdate = (renderer, mouse, methodName) => {
+            if (!this.exists()) {
+                return Promise.resolve({});
+            }
+
             return location[methodName](renderer, mouse)
             .then((outputFromLocation) => {
                 var promises = _.map(actions, (action) => {
