@@ -47,12 +47,18 @@ define([
             }
         });
 
+        var dynamicCondition = data.if
+        ? () => {
+            return !!getGame().getVariable(data.if);
+        }
+        : () => { return true; }
+
         this.isHidding = () => {
             return data.hidden;
         }
 
         this.exists = () => {
-            return _.reduce(actions, function(acc, action) {
+            return dynamicCondition() && _.reduce(actions, function(acc, action) {
                 return acc || action.shouldBeShown();
             }, false);
         }

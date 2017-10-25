@@ -76,7 +76,12 @@
                 },
                 {
                     "actions": [
-                        "takeDocument1"
+                        "takeDocument1",
+                        {
+                            "target": "clockShouldBeAccessible",
+                            "type": "setVariable",
+                            "value": true
+                        }
                     ],
                     "hidden": false,
                     "location": {
@@ -149,6 +154,7 @@
                         }
                     ],
                     "hidden": false,
+                    "if": "clockShouldBeAccessible",
                     "location": {
                         "description": {
                             "center": {
@@ -190,5 +196,8 @@
             "name": "The Flowers"
         }
     },
-    "startScene": "first"
+    "startScene": "first",
+    "variables": {
+        "clockShouldBeAccessible": false
+    }
 }

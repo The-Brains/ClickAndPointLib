@@ -76,6 +76,37 @@ define([
                 shouldBeShown: () => {
                     return !getGame().isItemOwned(target);
                 }
+            },
+            setVariable: {
+                hoverCursor: null,
+                checkData: () => {
+                    CheckData.checkKeys(
+                        data,
+                        [
+                            'value',
+                        ],
+                        true,
+                        this.getName()
+                    );
+                    getGame().isValidVariableName(target, true);
+                },
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            setVariable: {
+                                target: target,
+                                value: data.value,
+                            }
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => {
+                    return false;
+                }
             }
         };
 
