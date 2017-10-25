@@ -466,6 +466,37 @@ ClickAndPointLib.define('app/action.js',[
                 shouldBeShown: () => {
                     return !getGame().isItemOwned(target);
                 }
+            },
+            setVariable: {
+                hoverCursor: null,
+                checkData: () => {
+                    CheckData.checkKeys(
+                        data,
+                        [
+                            'value',
+                        ],
+                        true,
+                        this.getName()
+                    );
+                    getGame().isValidVariableName(target, true);
+                },
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            setVariable: {
+                                target: target,
+                                value: data.value,
+                            }
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => {
+                    return false;
+                }
             }
         };
 
@@ -563,12 +594,18 @@ ClickAndPointLib.define('app/interaction.js',[
             }
         });
 
+        var dynamicCondition = data.if
+        ? () => {
+            return !!getGame().getVariable(data.if);
+        }
+        : () => { return true; }
+
         this.isHidding = () => {
             return data.hidden;
         }
 
         this.exists = () => {
-            return _.reduce(actions, function(acc, action) {
+            return dynamicCondition() && _.reduce(actions, function(acc, action) {
                 return acc || action.shouldBeShown();
             }, false);
         }
@@ -822,6 +859,7 @@ ClickAndPointLib.define('app/game',[
         this.globalActions = {};
         this.currentScene = null;
         this.items = {};
+        this.variables = {};
 
         this.getName = () => {
             return 'MainGame';
@@ -848,7 +886,8 @@ ClickAndPointLib.define('app/game',[
                         'startScene',
                         'scenes',
                         'items',
-                        'globalActions'
+                        'globalActions',
+                        'variables',
                     ],
                     true,
                     this.getName()
@@ -874,6 +913,11 @@ ClickAndPointLib.define('app/game',[
                     this.items[key] = {};
                 });
 
+                // init variables
+                _.each(this.sourceData.variables, (variable, key) => {
+                    this.variables[key] = {};
+                });
+
 
                 // create Global Actions
                  _.each(this.sourceData.globalActions, (actionData, key) => {
@@ -896,7 +940,15 @@ ClickAndPointLib.define('app/game',[
                     this.items[key] = new Item(this, key, item);
                 });
 
+                // create variables
+                _.each(this.sourceData.variables, (variable, key) => {
+                    this.variables[key] = variable;
+                });
+
                 return changeScene(this.sourceData.startScene)
+                .then((output) => {
+                    return render();
+                })
                 .then(() => {
                     $(window).resize(_.debounce(render, 500, {
                         maxWait: 1000,
@@ -933,9 +985,24 @@ ClickAndPointLib.define('app/game',[
             return result;
         }
 
+        this.isValidVariableName = (varName, raise=false) => {
+            var result = _.has(this.variables, varName);
+
+            if (!result && raise) {
+                throw `[MISSING VARIABLE] The variable '${varName}' cannot be find.`;
+            }
+
+            return result;
+        }
+
         this.isItemOwned = (itemKey) => {
             this.isValidItemKey(itemKey, true);
             return this.items[itemKey].owned;
+        }
+
+        this.getVariable = (varName) => {
+            this.isValidVariableName(varName, true);
+            return this.variables[varName];
         }
 
         var resetCanvas = () => {
@@ -951,14 +1018,25 @@ ClickAndPointLib.define('app/game',[
 
             this.currentScene = this.scenes[sceneKey];
             this.mouse.defaultCursor();
-            return render();
+            return Promise.resolve({
+                render: true,
+            });
         }
 
         var takeItem = (itemKey) => {
             this.isValidItemKey(itemKey, true);
             this.items[itemKey].owned = true;
             this.mouse.updateCursor('default');
-            return render();
+            return Promise.resolve({
+                render: true,
+            });
+        }
+
+        var updateVariable = (varName, varValue) => {
+            this.variables[varName] = varValue;
+            return Promise.resolve({
+                render: true,
+            });
         }
 
         var render = () => {
@@ -998,13 +1076,37 @@ ClickAndPointLib.define('app/game',[
             .then((output) => {
                 output = _.flatten(output);
                 var newScene = _.find(output, 'newScene');
-                var takenItem = _.find(output, 'takeItem');
+                var takenItems = _.filter(output, 'takeItem');
+                var updateVariables = _.filter(output, 'setVariable');
+
+                var promises = [];
+
                 if (newScene) {
-                    return changeScene(newScene.newScene);
+                    promises.push(changeScene(newScene.newScene));
                 }
-                if (takenItem) {
-                    return takeItem(takenItem.takeItem);
+                if (takenItems && takenItems.length > 0 ) {
+                    promises = _.concat(promises, _.map(takenItems, (takenItem) => {
+                        return takeItem(takenItem.takeItem);
+                    }));
                 }
+                if (updateVariables && updateVariables.length > 0) {
+                    promises = _.concat(promises, _.map(updateVariables, (updateVar) => {
+                        return updateVariable(
+                            updateVar.setVariable.target,
+                            updateVar.setVariable.value
+                        );
+                    }));
+                }
+                return Promise.all(promises);
+            })
+            .then((outputs) => {
+                var needRender = _.find(outputs, 'render');
+
+                if (needRender) {
+                    return render();
+                }
+
+                return Promise.resolve();
             });
         }
 
