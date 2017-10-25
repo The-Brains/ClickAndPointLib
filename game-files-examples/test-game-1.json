@@ -25,6 +25,32 @@
         }
     },
     "scenes": {
+        "clockView": {
+            "backgroundImg": "./assets/clock_view.jpg",
+            "interactions": [
+                {
+                    "actions": [
+                        "goingHome"
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "bottomRightCorner": {
+                                "x": 100,
+                                "y": 100
+                            },
+                            "image": "./assets/back_icon.png",
+                            "topLeftCorner": {
+                                "x": 25,
+                                "y": 25
+                            }
+                        },
+                        "shape": "icon"
+                    }
+                }
+            ],
+            "name": "The Clock"
+        },
         "fireView": {
             "backgroundImg": "./assets/the_fire_place.jpg",
             "interactions": [
@@ -111,6 +137,25 @@
                                 "y": 860
                             },
                             "radius": 110
+                        },
+                        "shape": "circle"
+                    }
+                },
+                {
+                    "actions": [
+                        {
+                            "target": "clockView",
+                            "type": "goto"
+                        }
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "center": {
+                                "x": 1518,
+                                "y": 308
+                            },
+                            "radius": 49
                         },
                         "shape": "circle"
                     }
