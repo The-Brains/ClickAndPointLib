@@ -1,0 +1,270 @@
+{
+  "globalActions": {
+    "takeShell": {
+      "actions": [
+        {
+          "target": "shell",
+          "type": "take"
+        }
+      ]
+    },
+    "takeCrab": {
+      "actions": [
+        {
+          "target": "crab",
+          "type": "take"
+        }
+      ]
+    },
+    "feedMonkey": {
+      "actions": [
+        {
+          "target": "monkey",
+          "type": "take"
+        }
+      ]
+    }
+  },
+  "scenes": {
+    "beach": {
+      "name": "beach",
+      "backgroundImg": "https://ak.picdn.net/shutterstock/videos/2763035/thumb/1.jpg",
+      "interactions": [
+        {
+          "actions": [
+            "takeCrab",
+            {
+              "target": "hasCrab",
+              "type": "setVariable",
+              "value": true
+            }
+          ],
+          "hidden": false,
+          "location": {
+            "description": {
+              "bottomRightCorner": {
+                "x": 380,
+                "y": 445
+              },
+              "topLeftCorner": {
+                "x": 300,
+                "y": 390
+              },
+              "image": "http://www.freepngimg.com/thumb/crab/3-2-crab-png-picture-thumb.png"
+            },
+            "shape": "icon"
+          }
+        },
+        {
+          "actions": [
+            "takeShell"
+          ],
+          "hidden": false,
+          "location": {
+            "description": {
+              "bottomRightCorner": {
+                "x": 800,
+                "y": 435
+              },
+              "topLeftCorner": {
+                "x": 700,
+                "y": 370
+              },
+              "image": "http://www.pngpix.com/wp-content/uploads/2016/07/PNGPIX-COM-Sea-Shell-PNG-Transparent-Image-2-1.png"
+            },
+            "shape": "icon"
+          }
+        },
+        {
+          "actions": [
+            {
+              "target": "jungle",
+              "type": "goto"
+            }
+          ],
+          "hidden": true,
+          "location": {
+            "description": {
+              "topLeftCorner": {
+                "x": 20,
+                "y": 270
+              },
+              "bottomRightCorner": {
+                "x": 100,
+                "y": 435
+              }
+            },
+            "shape": "square"
+          }
+        }
+      ]
+    },
+    "jungle": {
+      "name": "jungle",
+      "backgroundImg": "https://cdnb.artstation.com/p/assets/images/images/002/237/025/large/emre-switzer-jungle.jpg?1459130749",
+      "interactions": [
+        {
+          "actions": [
+            {
+              "target": "beach",
+              "type": "goto"
+            }
+          ],
+          "hidden": true,
+          "location": {
+            "description": {
+              "topLeftCorner": {
+                "x": 400,
+                "y": 900
+              },
+              "bottomRightCorner": {
+                "x": 1600,
+                "y": 1035
+              }
+            },
+            "shape": "square"
+          }
+        },
+        {
+          "actions": [
+            {
+              "target": "bridge",
+              "type": "goto"
+            }
+          ],
+          "hidden": true,
+          "location": {
+            "description": {
+              "topLeftCorner": {
+                "x": 700,
+                "y": 400
+              },
+              "bottomRightCorner": {
+                "x": 1200,
+                "y": 735
+              }
+            },
+            "shape": "square"
+          }
+        }
+      ]
+    },
+    "bridge": {
+      "name": "bridge",
+      "backgroundImg": "http://www.powerpointhintergrund.com/uploads/2017/05/jungle-background-wallpapers-win10-themes-17.jpeg",
+      "interactions": [
+        {
+          "actions": [
+            {
+              "target": "jungle",
+              "type": "goto"
+            }
+          ],
+          "hidden": true,
+          "location": {
+            "description": {
+              "topLeftCorner": {
+                "x": 400,
+                "y": 900
+              },
+              "bottomRightCorner": {
+                "x": 1600,
+                "y": 1035
+              }
+            },
+            "shape": "square"
+          }
+        },
+        {
+          "actions": [
+            {
+              "target": "temple",
+              "type": "goto"
+            }
+          ],
+          "hidden": true,
+          "location": {
+            "description": {
+              "topLeftCorner": {
+                "x": 800,
+                "y": 300
+              },
+              "bottomRightCorner": {
+                "x": 1050,
+                "y": 535
+              }
+            },
+            "shape": "square"
+          }
+        }
+      ]
+    },
+    "temple": {
+      "name": "temple",
+      "backgroundImg": "https://photos.travelblog.org/Photos/34570/353114/f/3210141-Jungle-Temple-0.jpg",
+      "interactions": [
+        {
+          "actions": [
+            {
+              "target": "bridge",
+              "type": "goto"
+            }
+          ],
+          "hidden": true,
+          "location": {
+            "description": {
+              "topLeftCorner": {
+                "x": 0,
+                "y": 400
+              },
+              "bottomRightCorner": {
+                "x": 600,
+                "y": 535
+              }
+            },
+            "shape": "square"
+          }
+        },
+        {
+          "actions": [
+            "feedMonkey"
+          ],
+          "hidden": false,
+          "if": "hasCrab",
+          "location": {
+            "description": {
+              "bottomRightCorner": {
+                "x": 300,
+                "y": 300
+              },
+              "image": "http://www.freepngimg.com/thumb/gorilla/1-2-gorilla-picture-thumb.png",
+              "topLeftCorner": {
+                "x": 100,
+                "y": 100
+              }
+            },
+            "shape": "icon"
+          }
+        }
+      ]
+    }
+  },
+  "items": {
+    "shell": {
+      "description": "A shell",
+      "icon": "http://www.pngpix.com/wp-content/uploads/2016/07/PNGPIX-COM-Sea-Shell-PNG-Transparent-Image-2-1.png"
+    },
+    "crab": {
+      "description": "A crab",
+      "icon": "http://www.freepngimg.com/thumb/crab/3-2-crab-png-picture-thumb.png"
+    },
+    "monkey": {
+      "description": "A monkey",
+      "icon": "http://www.nhm.ac.uk/natureplus/servlet/JiveServlet/showImage/38-1100-1221/Gorilla3.jpg"
+    }
+  },
+  "variables": {
+    "hasCrab": false
+  },
+  "startScene": "beach"
+}
