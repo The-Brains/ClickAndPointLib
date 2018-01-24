@@ -5,7 +5,8 @@ define([
     ], function($, _, Game) {
         var game = new Game(
             './game-files-examples/test-game-1.json',
-            document.getElementById('canvas')
+            document.getElementById('canvas'),
+            null
         );
 
         $('.CanvasArea').removeClass('is-hidden');
