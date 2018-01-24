@@ -46,7 +46,7 @@ define([
             var result = _.has(this.globalActions, actionName);
 
             if (!result) {
-                throw `[MISSING ACTION] The action '${actionName}' cannot be find.`;
+                throw `[MISSING ACTION] The action '${actionName}' cannot be found.`;
             }
 
             return this.globalActions[actionName];
@@ -146,7 +146,7 @@ define([
             var result = _.has(this.scenes, sceneKey);
 
             if (!result && raise) {
-                throw `[MISSING SCENE] The scene '${sceneKey}' cannot be find.`;
+                throw `[MISSING SCENE] The scene '${sceneKey}' cannot be found.`;
             }
 
             return result;
@@ -160,7 +160,7 @@ define([
             }
 
             if (!result && raise) {
-                throw `[MISSING ITEMS] The item '${itemKey}' cannot be find.`;
+                throw `[MISSING ITEMS] The item '${itemKey}' cannot be found.`;
             }
 
             return result;
@@ -174,7 +174,7 @@ define([
             }
 
             if (!result && raise) {
-                throw `[MISSING VARIABLE] The variable '${varName}' cannot be find.`;
+                throw `[MISSING VARIABLE] The variable '${varName}' cannot be found.`;
             }
 
             return result;
