@@ -1,7 +1,7 @@
 define([
     'jquery',
     'lodash',
-    '../utility/read-file.js',
+    '../utility/data-provider.js',
     '../utility/check-data.js',
     './renderer.js',
     './mouse.js',
@@ -9,8 +9,8 @@ define([
     './action.js',
     './item.js',
 ],
-($, _, ReadFile, CheckData, Renderer, Mouse, Scene, Action, Item) => {
-    var Game = function(sourceFile, canvas) {
+($, _, DataProvider, CheckData, Renderer, Mouse, Scene, Action, Item) => {
+    var Game = function(sourceFile, canvas, sourceData) {
         var myself = self;
         var $canvas = null;
         this.renderer = null;
@@ -27,8 +27,10 @@ define([
         var backgroundColor = null;
 
         this.mouse = new Mouse();
+        this.dataProvider = new DataProvider();
+        this.dataProvider.sourceFile = sourceFile;
+        this.dataProvider.sourceData = sourceData;
 
-        this.sourceFile = sourceFile;
         this.sourceData = null;
         this.scenes = {};
         this.globalActions = {};
@@ -51,7 +53,7 @@ define([
         }
 
         this.start = () => {
-            return ReadFile.readFileAsJson(sourceFile)
+            return this.dataProvider.fetchData()
             .then((data) => {
                 this.sourceData = data;
 
