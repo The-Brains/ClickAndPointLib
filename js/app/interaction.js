@@ -38,26 +38,34 @@ define([
         );
 
         var location = new Location(this, data.location);
-        var actions = _.flatMap(data.actions, (action, index) => {
-            if (typeof action === 'string') {
-                var actions = getGame().getActions(action);
-                return actions;
-            } else {
-                return new Action(this, index, action);
-            }
-        });
+        var actions = [];
+        var self = this;
 
-        var dynamicCondition = data.if
-        ? () => {
-            return !!getGame().getVariable(data.if);
+        function ensureActions() {
+            actions = _.flatMap(data.actions, (action, index) => {
+                if (actions[index]) {
+                    return actions[index];
+                } else if (typeof action === 'string') {
+                    return getGame().getActions(action);
+                } else if (action.ref && action.useRef) {
+                    return getGame().getActions(action.ref);
+                } else {
+                    return new Action(self, index, action);
+                }
+            });
+            return actions;
         }
-        : () => { return true; }
+
+        var dynamicCondition = () => {
+            return data.if ? !!getGame().getVariable(data.if) : true;
+        };
 
         this.isHidding = () => {
             return data.hidden;
         }
 
         this.exists = () => {
+            ensureActions();
             return dynamicCondition() && _.reduce(actions, function(acc, action) {
                 return acc || action.shouldBeShown();
             }, false);
@@ -70,6 +78,7 @@ define([
 
             return location[methodName](renderer, mouse)
             .then((outputFromLocation) => {
+                ensureActions();
                 var promises = _.map(actions, (action) => {
                     return action[methodName](renderer, mouse, outputFromLocation.isInside);
                 });
