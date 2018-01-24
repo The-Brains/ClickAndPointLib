@@ -12,6 +12,10 @@ define([
             y: 0,
         }
 
+        this.getBackgroundRatio = () => {
+            return backgroundRatio;
+        }
+
         this.setBackgroundRatio = (width, height) => {
             backgroundRatio.width = width;
             backgroundRatio.height = height;
@@ -36,8 +40,19 @@ define([
             };
         }
 
+        this.convertBackgroundToCoordinate = (point) => {
+            return {
+                x: (point.x - offset.x) / backgroundRatio.width,
+                y: (point.y - offset.y) / backgroundRatio.height,
+            };
+        }
+
         this.convertValueToBackground = (value) => {
             return value * backgroundRatio.width;
+        }
+
+        this.convertBackgroundToValue = (value) => {
+            return value / backgroundRatio.width;
         }
 
         this.setOffset = (offsetX, offsetY) => {
