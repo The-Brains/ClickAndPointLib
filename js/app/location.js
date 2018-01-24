@@ -5,10 +5,9 @@ define([
     var Location = function(parent, data) {
         this.parent = parent;
         var myself = self;
-        var shape = data.shape;
 
         this.getName = () => {
-            return parent.getName() + ` - Location ${shape}`;
+            return parent.getName() + ` - Location ${data.shape}`;
         }
 
         CheckData.checkKeys(
@@ -21,7 +20,6 @@ define([
             this.getName()
         );
 
-        var description = data.description;
         var colorInside = 'blue';
         var colorDefault = 'black';
         var wasDrawn = false;
@@ -29,7 +27,7 @@ define([
         this.square = {
             dataCheck: () => {
                 CheckData.checkKeys(
-                    description,
+                    data.description,
                     [
                         'bottomRightCorner',
                         'bottomRightCorner.x',
@@ -41,16 +39,16 @@ define([
                     true,
                     this.getName()
                 );
-                if (description.topLeftCorner.x >= description.bottomRightCorner.x) {
+                if (data.description.topLeftCorner.x >= data.description.bottomRightCorner.x) {
                     throw `[${this.getName()}] The topLeftCorner.x is bigger than bottomRightCorner.x`;
                 }
-                if (description.topLeftCorner.y >= description.bottomRightCorner.y) {
+                if (data.description.topLeftCorner.y >= data.description.bottomRightCorner.y) {
                     throw `[${this.getName()}] The topLeftCorner.y is bigger than bottomRightCorner.y`;
                 }
             },
             draw: (renderer, color) => {
-                var topLeftCorner = renderer.convertCoordonateToBackground(description.topLeftCorner);
-                var bottomRightCorner = renderer.convertCoordonateToBackground(description.bottomRightCorner);
+                var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner);
+                var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner);
                 var canvasContext = renderer.getContext();
 
                 canvasContext.beginPath();
@@ -71,8 +69,8 @@ define([
                 if (!mouse.isInitialize()) {
                     return false;
                 }
-                var topLeftCorner = renderer.convertCoordonateToBackground(description.topLeftCorner);
-                var bottomRightCorner = renderer.convertCoordonateToBackground(description.bottomRightCorner);
+                var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner);
+                var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner);
                 return (
                     mouse.getX() <= bottomRightCorner.x && mouse.getX() >= topLeftCorner.x &&
                     mouse.getY() <= bottomRightCorner.y && mouse.getY() >= topLeftCorner.y
@@ -83,7 +81,7 @@ define([
         this.circle = {
             dataCheck: () => {
                 CheckData.checkKeys(
-                    description,
+                    data.description,
                     [
                         'center',
                         'center.x',
@@ -95,8 +93,8 @@ define([
                 );
             },
             draw: (renderer, color) => {
-                var center = renderer.convertCoordonateToBackground(description.center);
-                var radius = renderer.convertValueToBackground(description.radius);
+                var center = renderer.convertCoordonateToBackground(data.description.center);
+                var radius = renderer.convertValueToBackground(data.description.radius);
                 var canvasContext = renderer.getContext();
 
                 canvasContext.beginPath();
@@ -111,8 +109,8 @@ define([
                 if (!mouse.isInitialize()) {
                     return false;
                 }
-                var center = renderer.convertCoordonateToBackground(description.center);
-                var radius = renderer.convertValueToBackground(description.radius);
+                var center = renderer.convertCoordonateToBackground(data.description.center);
+                var radius = renderer.convertValueToBackground(data.description.radius);
                 return Math.pow(mouse.getX() - center.x, 2) + Math.pow(mouse.getY() - center.y, 2)
                     < Math.pow(radius, 2);
             },
@@ -122,7 +120,7 @@ define([
             dataCheck: () => {
                 this.square.dataCheck();
                 CheckData.checkKeys(
-                    description,
+                    data.description,
                     [
                         'image',
                     ],
@@ -132,8 +130,8 @@ define([
             },
             draw: (renderer, color) => {
                 return new Promise((resolve) => {
-                    var topLeftCorner = renderer.convertCoordonateToBackground(description.topLeftCorner);
-                    var bottomRightCorner = renderer.convertCoordonateToBackground(description.bottomRightCorner);
+                    var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner);
+                    var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner);
                     var img = new Image();
                     var $canvas = renderer.get$Canvas();
                     var canvasContext = renderer.getContext();
@@ -151,7 +149,7 @@ define([
                         );
                         resolve();
                     };
-                    img.src = description.image;
+                    img.src = data.description.image;
                 });
             },
             isInside: (renderer, mouse) => {
@@ -160,15 +158,15 @@ define([
         }
 
         var handleUpdate = (renderer, mouse) => {
-            var isInside = this[shape].isInside(renderer, mouse);
+            var isInside = this[data.shape].isInside(renderer, mouse);
             return Promise.resolve()
             .then(() => {
                 if (isInside) {
                     wasDrawn = true;
-                    return this[shape].draw(renderer, colorInside);
+                    return this[data.shape].draw(renderer, colorInside);
                 } else if (!parent.isHidding()) {
                     wasDrawn = true;
-                    return this[shape].draw(renderer, colorDefault);
+                    return this[data.shape].draw(renderer, colorDefault);
                 } else {
                     var returnedData = {
                         needRedrawScene: wasDrawn,
@@ -193,19 +191,19 @@ define([
         }
 
         this.handleClickDown = (renderer, mouse) => {
-            var isInside = this[shape].isInside(renderer, mouse);
+            var isInside = this[data.shape].isInside(renderer, mouse);
             return Promise.resolve({
                 isInside: isInside,
             });
         }
         this.handleClickUp = (renderer, mouse) => {
-            var isInside = this[shape].isInside(renderer, mouse);
+            var isInside = this[data.shape].isInside(renderer, mouse);
             return Promise.resolve({
                 isInside: isInside,
             });
         }
 
-        this[shape].dataCheck();
+        this[data.shape].dataCheck();
     }
 
     return Location;
