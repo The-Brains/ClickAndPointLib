@@ -1,4 +1,4 @@
-define(['../utility/read-file.js'], function(ReadFile) {
+define(['./read-file.js'], function(ReadFile) {
 
     function DataProvider() {
 
