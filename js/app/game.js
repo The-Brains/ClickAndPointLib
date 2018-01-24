@@ -154,6 +154,10 @@ define([
 
         this.isValidItemKey = (itemKey, raise=false) => {
             var result = _.has(this.items, itemKey);
+            if(!result && _.has(this.sourceData.items, itemKey)) {
+                this.items[itemKey] = new Item(this, itemKey, this.sourceData.items[itemKey]);
+                result = _.has(this.items, itemKey);
+            }
 
             if (!result && raise) {
                 throw `[MISSING ITEMS] The item '${itemKey}' cannot be find.`;
@@ -164,6 +168,10 @@ define([
 
         this.isValidVariableName = (varName, raise=false) => {
             var result = _.has(this.variables, varName);
+            if (!result && typeof(this.sourceData.variables[varName])!=='undefined') {
+                this.variables[varName] = this.sourceData.variables[varName];
+                result = _.has(this.variables, varName);
+            }
 
             if (!result && raise) {
                 throw `[MISSING VARIABLE] The variable '${varName}' cannot be find.`;
@@ -178,6 +186,14 @@ define([
         }
 
         this.getVariable = (varName) => {
+            // check item
+            if(varName.indexOf('has')===0) {
+                var itemKey = _.camelCase(varName.substr(3));
+                if(this.isValidItemKey(itemKey)) {
+                    return this.isItemOwned(itemKey);
+                }
+            }
+
             this.isValidVariableName(varName, true);
             return this.variables[varName];
         }
@@ -191,6 +207,10 @@ define([
         }
 
         var changeScene = (sceneKey) => {
+            if(!this.scenes[sceneKey]) {
+                this.scenes[sceneKey] = new Scene(this, sceneKey, this.sourceData.scenes[sceneKey]);
+            }
+
             this.isValidSceneKey(sceneKey, true);
 
             this.currentScene = this.scenes[sceneKey];
@@ -208,6 +228,14 @@ define([
                 render: true,
             });
         }
+        var dropItem = (itemKey) => {
+            this.isValidItemKey(itemKey, true);
+            this.items[itemKey].owned = false;
+            this.mouse.updateCursor('default');
+            return Promise.resolve({
+                render: true,
+            });
+        };
 
         var updateVariable = (varName, varValue) => {
             this.variables[varName] = varValue;
@@ -226,7 +254,9 @@ define([
             offsetX = boundingBox.left;
             offsetY = boundingBox.top;
 
-            return this.currentScene.render(this.renderer, this.mouse);
+            if(this.currentScene) {
+                return this.currentScene.render(this.renderer, this.mouse);
+            }
         }
 
         var updateMousePosition = (e) => {
