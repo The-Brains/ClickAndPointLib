@@ -2,8 +2,9 @@ define([
     'lodash',
     '../utility/check-data.js',
     './interaction.js',
+    '../utility/retina.js',
 ],
-(_, CheckData, Interaction) => {
+(_, CheckData, Interaction, isRetina) => {
     var Scene = function(parent, key, data) {
         this.parent = parent;
         var myself = self;
@@ -55,6 +56,7 @@ define([
             var height = fullHeight;
             var fullWidth =  $canvas.width();
             var width = fullWidth;
+            var resolution = isRetina ? 2 : 1;
 
             var ratioWidth = originalWidth / width;
             var ratioHeight = originalHeight / height;
@@ -81,7 +83,7 @@ define([
 
             renderer.setOffset(cornerX, cornerY);
 
-            canvasContext.drawImage(image, cornerX, cornerY, width, height);
+            canvasContext.drawImage(image, cornerX, cornerY, width * resolution, height * resolution);
             callback();
         }
 
