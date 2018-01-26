@@ -1,7 +1,8 @@
 define([
     '../utility/check-data.js',
+    '../utility/retina.js',
 ],
-(CheckData) => {
+(CheckData, isRetina) => {
     var Location = function(parent, data) {
         this.parent = parent;
         var myself = self;
@@ -47,8 +48,8 @@ define([
                 }
             },
             draw: (renderer, color) => {
-                var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner);
-                var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner);
+                var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner, true);
+                var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner, true);
                 var canvasContext = renderer.getContext();
 
                 canvasContext.beginPath();
@@ -59,7 +60,7 @@ define([
                     bottomRightCorner.y - topLeftCorner.y,
                 );
 
-                canvasContext.lineWidth = 3;
+                canvasContext.lineWidth = isRetina ? 6 : 3;
                 canvasContext.strokeStyle = color;
                 canvasContext.stroke();
 
@@ -93,13 +94,13 @@ define([
                 );
             },
             draw: (renderer, color) => {
-                var center = renderer.convertCoordonateToBackground(data.description.center);
-                var radius = renderer.convertValueToBackground(data.description.radius);
+                var center = renderer.convertCoordonateToBackground(data.description.center, true);
+                var radius = renderer.convertValueToBackground(data.description.radius, true);
                 var canvasContext = renderer.getContext();
 
                 canvasContext.beginPath();
                 canvasContext.arc(center.x, center.y, radius, 0, 2 * Math.PI, false);
-                canvasContext.lineWidth = 3;
+                canvasContext.lineWidth = isRetina ? 6 : 3;
                 canvasContext.strokeStyle = color;
                 canvasContext.stroke();
 
@@ -130,16 +131,14 @@ define([
             },
             draw: (renderer, color) => {
                 return new Promise((resolve) => {
-                    var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner);
-                    var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner);
+                    var topLeftCorner = renderer.convertCoordonateToBackground(data.description.topLeftCorner, true);
+                    var bottomRightCorner = renderer.convertCoordonateToBackground(data.description.bottomRightCorner, true);
                     var img = new Image();
-                    var $canvas = renderer.get$Canvas();
                     var canvasContext = renderer.getContext();
 
                     img.onload = (source) => {
                         var originalWidth = source.target.naturalWidth;
                         var originalHeight = source.target.naturalHeight;
-                        var originalRatio = originalWidth / originalHeight * 1.0;
 
                         canvasContext.drawImage(img,
                             topLeftCorner.x,
