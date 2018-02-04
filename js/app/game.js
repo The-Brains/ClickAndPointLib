@@ -52,75 +52,82 @@ define([
             return this.globalActions[actionName];
         }
 
+        /**
+        * Can be used by the editor to reload the edited data.
+        */
+        this.reloadGame = (data) => {
+            this.sourceData = data;
+
+            CheckData.checkKeys(
+                this.sourceData,
+                [
+                    'startScene',
+                    'scenes',
+                    'items',
+                    'globalActions',
+                    'variables',
+                ],
+                true,
+                this.getName()
+            );
+
+            backgroundColor = this.sourceData.backgroundColor || 'black';
+
+            // init actions
+            _.each(this.sourceData.globalActions, (actionData, key) => {
+                CheckData.checkKeys(actionData, ['actions'], true,
+                    this.getName() + ` - globalActions - ${key}`);
+
+                this.globalActions[key] = [];
+            });
+
+            // init scenes
+            _.each(this.sourceData.scenes, (sceneData, key) => {
+                this.scenes[key] = {};
+            });
+
+            // Init Items
+            _.each(this.sourceData.items, (item, key) => {
+                this.items[key] = {};
+            });
+
+            // init variables
+            _.each(this.sourceData.variables, (variable, key) => {
+                this.variables[key] = {};
+            });
+
+
+            // create Global Actions
+             _.each(this.sourceData.globalActions, (actionData, key) => {
+                _.each(actionData.actions, (action, index) => {
+                    this.globalActions[key].push(new Action(this, `${key}-${index}` ,action));
+                });
+            });
+            ////
+
+            // Create scenes
+            _.each(this.sourceData.scenes, (sceneData, key) => {
+                this.scenes[key] = new Scene(this, key, sceneData);
+            });
+            CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true,
+                `The scenes are missing first scene named '${this.sourceData.startScene}'`);
+            ////
+
+            // Create items
+            _.each(this.sourceData.items, (item, key) => {
+                this.items[key] = new Item(this, key, item);
+            });
+
+            // create variables
+            _.each(this.sourceData.variables, (variable, key) => {
+                this.variables[key] = variable;
+            });
+        }
+
         this.start = () => {
             return this.dataProvider.fetchData()
             .then((data) => {
-                this.sourceData = data;
-
-                CheckData.checkKeys(
-                    this.sourceData,
-                    [
-                        'startScene',
-                        'scenes',
-                        'items',
-                        'globalActions',
-                        'variables',
-                    ],
-                    true,
-                    this.getName()
-                );
-
-                backgroundColor = this.sourceData.backgroundColor || 'black';
-
-                // init actions
-                _.each(this.sourceData.globalActions, (actionData, key) => {
-                    CheckData.checkKeys(actionData, ['actions'], true,
-                        this.getName() + ` - globalActions - ${key}`);
-
-                    this.globalActions[key] = [];
-                });
-
-                // init scenes
-                _.each(this.sourceData.scenes, (sceneData, key) => {
-                    this.scenes[key] = {};
-                });
-
-                // Init Items
-                _.each(this.sourceData.items, (item, key) => {
-                    this.items[key] = {};
-                });
-
-                // init variables
-                _.each(this.sourceData.variables, (variable, key) => {
-                    this.variables[key] = {};
-                });
-
-
-                // create Global Actions
-                 _.each(this.sourceData.globalActions, (actionData, key) => {
-                    _.each(actionData.actions, (action, index) => {
-                        this.globalActions[key].push(new Action(this, `${key}-${index}` ,action));
-                    });
-                });
-                ////
-
-                // Create scenes
-                _.each(this.sourceData.scenes, (sceneData, key) => {
-                    this.scenes[key] = new Scene(this, key, sceneData);
-                });
-                CheckData.checkKeys(this.scenes, [this.sourceData.startScene], true,
-                    `The scenes are missing first scene named '${this.sourceData.startScene}'`);
-                ////
-
-                // Create items
-                _.each(this.sourceData.items, (item, key) => {
-                    this.items[key] = new Item(this, key, item);
-                });
-
-                // create variables
-                _.each(this.sourceData.variables, (variable, key) => {
-                    this.variables[key] = variable;
-                });
+                this.reloadGame(data);
 
                 return changeScene(this.sourceData.startScene)
                 .then((output) => {
