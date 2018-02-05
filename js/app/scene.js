@@ -44,7 +44,7 @@ define([
         this.getImageBackground = () => {
             return data.backgroundImg;
         }
-        
+
         function applyBackgroundImage(image, renderer, callback) {
             var $canvas = renderer.get$Canvas();
             var canvasContext = renderer.getContext();

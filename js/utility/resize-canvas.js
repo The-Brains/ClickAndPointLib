@@ -1,5 +1,5 @@
 define(['jquery', 'lodash', './retina.js'], function($, _, isRetina) {
-    function resizeCanvas() {
+    var resizeCanvas = function() {
         var canvasDrawing = $('#canvas');
         var container = $('.page-content');
 
@@ -18,5 +18,6 @@ define(['jquery', 'lodash', './retina.js'], function($, _, isRetina) {
     $(window).resize(_.debounce(resizeCanvas, 200, {
         maxWait: 1000,
     }));
-    resizeCanvas();
+
+    return resizeCanvas;
 });
