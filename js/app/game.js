@@ -8,8 +8,9 @@ define([
     './scene.js',
     './action.js',
     './item.js',
+    './dialogue.js',
 ],
-($, _, DataProvider, CheckData, Renderer, Mouse, Scene, Action, Item) => {
+($, _, DataProvider, CheckData, Renderer, Mouse, Scene, Action, Item, Dialogue) => {
     var Game = function(sourceFile, canvas, sourceData) {
         var myself = self;
         var $canvas = null;
@@ -37,6 +38,7 @@ define([
         this.currentScene = null;
         this.items = {};
         this.variables = {};
+        this.dialogues = {};
 
         this.getName = () => {
             return 'MainGame';
@@ -96,6 +98,11 @@ define([
                 this.variables[key] = {};
             });
 
+            // init dialogues
+            _.each(this.sourceData.dialogues, (dialogue, key) => {
+                this.dialogues[key] = {};
+            });
+
 
             // create Global Actions
              _.each(this.sourceData.globalActions, (actionData, key) => {
@@ -117,11 +124,19 @@ define([
             _.each(this.sourceData.items, (item, key) => {
                 this.items[key] = new Item(this, key, item);
             });
+            ///
 
             // create variables
             _.each(this.sourceData.variables, (variable, key) => {
                 this.variables[key] = variable;
             });
+            ///
+
+            // create dialogues
+            _.each(this.sourceData.dialogues, (dialogue, key) => {
+                this.dialogues[key] = new Dialogue(this, key, dialogue);
+            });
+            ///
         }
 
         this.start = () => {
@@ -152,6 +167,11 @@ define([
         this.isValidSceneKey = (sceneKey, raise=false) => {
             var result = _.has(this.scenes, sceneKey);
 
+            if(!result && _.has(this.sourceData.scenes, sceneKey)) {
+                this.scenes[sceneKey] = new Scene(this, sceneKey, this.sourceData.scenes[sceneKey]);
+                result = _.has(this.scenes, sceneKey);
+            }
+
             if (!result && raise) {
                 throw `[MISSING SCENE] The scene '${sceneKey}' cannot be found.`;
             }
@@ -168,6 +188,20 @@ define([
 
             if (!result && raise) {
                 throw `[MISSING ITEMS] The item '${itemKey}' cannot be found.`;
+            }
+
+            return result;
+        }
+
+        this.isValidDialogueKey = (dialogueKey, raise=false) => {
+            var result = _.has(this.dialogues, dialogueKey);
+            if(!result && _.has(this.sourceData.dialogues, dialogueKey)) {
+                this.dialogues[dialogueKey] = new Dialogue(this, dialogueKey, this.sourceData.dialogues[dialogueKey]);
+                result = _.has(this.dialogues, dialogueKey);
+            }
+
+            if (!result && raise) {
+                throw `[MISSING DIALOGUE] The dialogue '${dialogueKey}' cannot be found.`;
             }
 
             return result;
@@ -214,13 +248,19 @@ define([
         }
 
         var changeScene = (sceneKey) => {
-            if(!this.scenes[sceneKey]) {
-                this.scenes[sceneKey] = new Scene(this, sceneKey, this.sourceData.scenes[sceneKey]);
-            }
-
             this.isValidSceneKey(sceneKey, true);
 
             this.currentScene = this.scenes[sceneKey];
+            this.mouse.defaultCursor();
+            return Promise.resolve({
+                render: true,
+            });
+        }
+
+        var startDialogue = (dialogueKey) => {
+            this.isValidDialogueKey(dialogueKey, true);
+
+            this.currentScene = this.dialogues[dialogueKey];
             this.mouse.defaultCursor();
             return Promise.resolve({
                 render: true,
@@ -297,9 +337,9 @@ define([
                 var newScene = _.find(output, 'newScene');
                 var takenItems = _.filter(output, 'takeItem');
                 var updateVariables = _.filter(output, 'setVariable');
+                var startDialogueKey = _.find(output, 'startDialogue');
 
                 var promises = [];
-
                 if (newScene) {
                     promises.push(changeScene(newScene.newScene));
                 }
@@ -315,6 +355,9 @@ define([
                             updateVar.setVariable.value
                         );
                     }));
+                }
+                if (startDialogueKey) {
+                    promises.push(startDialogue(startDialogueKey.startDialogue));
                 }
                 return Promise.all(promises);
             })

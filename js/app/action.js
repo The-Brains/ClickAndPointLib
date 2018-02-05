@@ -107,6 +107,24 @@ define([
                 shouldBeShown: () => {
                     return false;
                 }
+            },
+            startdialogue: {
+                checkData: () => {
+                    getGame().isValidDialogueKey(target, true);
+                },
+                hoverCursor: data.hoverCursor || 'pointer',
+                actClickDown: (renderer, mouse, isHover) => {
+                    if (isHover) {
+                        return Promise.resolve({
+                            startDialogue: target,
+                        });
+                    }
+                    return Promise.resolve({});
+                },
+                shouldBeShown: () => { return true; },
+                actClickUp: (renderer, mouse, isHover) => {
+                    return Promise.resolve({});
+                }
             }
         };
 
