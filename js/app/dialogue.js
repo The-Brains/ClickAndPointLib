@@ -1,19 +1,21 @@
 define([
     'lodash',
     '../utility/check-data.js',
-    './interaction.js',
     '../utility/retina.js',
+    './interaction.js',
+    './answer.js',
 ],
-(_, CheckData, Interaction, isRetina) => {
-    var Scene = function(parent, key, data) {
-        this.parent = parent;
+(_, CheckData, isRetina, Interaction, Answer) => {
+	var Dialogue = function(parent, key, data) {
+ 		this.parent = parent;
+        this.data = data;
         var myself = self;
 
         this.getName = () => {
             if (parent) {
-                return parent.getName() + ` - Scene '${key}'`;
+                return parent.getName() + ` - Dialogue '${key}'`;
             } else {
-                return `Scene '${key}'`;
+                return `Dialogue '${key}'`;
             }
         }
 
@@ -22,7 +24,9 @@ define([
             [
                 'name',
                 'backgroundImg',
+                'answers',
                 'interactions',
+                'startAnswer',
             ],
             true,
             this.getName()
@@ -30,13 +34,27 @@ define([
 
         var name = data.name;
         var key = key;
+
         var interactions = [];
+        var answers = [];
+
+        var ensureAnswers = () => {
+             _.each(data.answers, (answer, key) => {
+                answers[key] = answers[key] || new Answer(this, key, answer);
+            });
+            return answers;
+        }
 
         var ensureInteractions = () => {
             interactions = _.map(data.interactions, (interaction, index) => {
                 return interactions[index] || new Interaction(this, index, interaction);
             });
             return interactions;
+        }
+
+        var ensureEverything = () => {
+            ensureAnswers();
+            ensureInteractions();
         }
 
         this.getImageBackground = () => {
@@ -102,8 +120,22 @@ define([
             });
         }
 
+        this.render = (renderer, mouse) => {
+            return renderBackground(renderer)
+            .then(() => {
+                return renderAnswer(this.currentAnswer, renderer, mouse)
+            })
+            .then(() => {
+                return handleUpdate(renderer, mouse, 'render');
+            });
+        }
+
+        var renderAnswer = (answer, renderer, mouse) => {
+            return answer.render(renderer, mouse);
+        }
+
         var handleUpdate = (renderer, mouse, methodName) => {
-            ensureInteractions();
+            ensureEverything();
 
             var promises = _.map(interactions, (interaction) => {
                 return interaction[methodName](renderer, mouse);
@@ -126,35 +158,32 @@ define([
             });;
         }
 
-        this.render = (renderer, mouse) => {
-            return renderBackground(renderer)
-            .then(() => {
-                return handleUpdate(renderer, mouse, 'render');
-            })
-        }
-
         this.handleCursorMove = (renderer, mouse) => {
             return handleUpdate(renderer, mouse, 'handleCursorMove');
         }
 
         this.handleClickDown = (renderer, mouse) => {
-            ensureInteractions();
+            ensureEverything();
             var promises = _.map(interactions, (interaction) => {
                 return interaction.handleClickDown(renderer, mouse);
             });
-            return Promise.all(promises)
+            return Promise.all(promises);
         }
 
         this.handleClickUp = (renderer, mouse) => {
-            ensureInteractions();
+            ensureEverything();
             var promises = _.map(interactions, (interaction) => {
                 return interaction.handleClickUp(renderer, mouse);
             });
-            return Promise.all(promises)
+            return Promise.all(promises);
         }
 
+        answers = ensureAnswers();
+        CheckData.checkKeys(answers, [data.startAnswer], true,
+            `The answers are missing first answer named '${data.startAnswer}'`);
+        this.currentAnswer = answers[data.startAnswer];
         interactions = ensureInteractions();
-    }
+	}
 
-    return Scene;
+	return Dialogue;
 });

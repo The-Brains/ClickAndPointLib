@@ -101,6 +101,8 @@ define([
         this.handleClickUp = (renderer, mouse) => {
             return handleUpdate(renderer, mouse, 'handleClickUp');
         }
+
+        ensureActions();
     }
 
     return Interaction;
