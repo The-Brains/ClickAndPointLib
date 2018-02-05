@@ -11,6 +11,12 @@ define([
             x: 0,
             y: 0,
         }
+        var backgroundDimensions = {
+            cornerX: undefined,
+            cornerY: undefined,
+            width: undefined,
+            height: undefined,
+        };
 
         this.getBackgroundRatio = () => {
             return backgroundRatio;
@@ -19,6 +25,19 @@ define([
         this.setBackgroundRatio = (width, height) => {
             backgroundRatio.width = width;
             backgroundRatio.height = height;
+        }
+
+        this.setBackgroundDimensions = (cornerX, cornerY, width, height) => {
+            backgroundDimensions = {
+                cornerX: cornerX,
+                cornerY: cornerY,
+                width: width,
+                height: height,
+            };
+        }
+
+        this.getBackgroundDimensions = () => {
+            return backgroundDimensions;
         }
 
         this.get$Canvas = () => {
