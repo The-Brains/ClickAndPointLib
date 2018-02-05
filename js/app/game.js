@@ -235,6 +235,7 @@ define([
                 render: true,
             });
         }
+
         var dropItem = (itemKey) => {
             this.isValidItemKey(itemKey, true);
             this.items[itemKey].owned = false;
@@ -249,6 +250,10 @@ define([
             return Promise.resolve({
                 render: true,
             });
+        }
+
+        this.rerender = () => {
+            render();
         }
 
         var render = () => {

@@ -31,7 +31,7 @@ define(['js/utility/find-get-param.js'], function(findGetParameter) {
     // Start loading the main app file. Put all of
     // your application logic in there.
     requirejs([
-        'js/utility/resize-canvas.js',
+        // 'js/utility/resize-canvas.js',
         'js/main-demo.js',
     ]);
 });
