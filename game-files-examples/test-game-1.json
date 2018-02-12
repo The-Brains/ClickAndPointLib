@@ -1,4 +1,51 @@
 {
+    "dialogues": {
+        "the_rose_dialogue": {
+            "answers": {
+                "firstEntry": {
+                    "mainText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla eu ex neque. In bibendum nulla erat, in mollis diam auctor sed. Etiam mattis sollicitudin blandit. In hac habitasse platea dictumst. Integer a elit accumsan, ornare sem quis, dapibus nisi. Aliquam ut dolor dignissim, semper ipsum ac, pellentesque nulla. Vivamus in.",
+                    "responses": [
+                        {
+                            "text": "answer 1"
+                        },
+                        {
+                            "text": "answer 2"
+                        }
+                    ]
+                }
+            },
+            "backgroundImg": "./assets/dialogue-with-rose.jpg",
+            "interactions": [
+                {
+                    "actions": [
+                        {
+                            "hoverCursor": "zoom-out",
+                            "target": "flowerView",
+                            "type": "goto"
+                        }
+                    ],
+                    "hidden": false,
+                    "location": {
+                        "description": {
+                            "bottomRightCorner": {
+                                "x": 150,
+                                "y": 150
+                            },
+                            "image": "./assets/back_icon.png",
+                            "topLeftCorner": {
+                                "x": 50,
+                                "y": 50
+                            }
+                        },
+                        "shape": "icon"
+                    }
+                }
+            ],
+            "name": "The rose is speaking",
+            "shareOfScreen_percent": 33,
+            "startAnswer": "firstEntry"
+        }
+    },
     "globalActions": {
         "goingHome": {
             "actions": [
@@ -213,44 +260,6 @@
                 }
             ],
             "name": "The Flowers"
-        }
-    },
-    "dialogues": {
-        "the_rose_dialogue": {
-            "name": "The rose is speaking",
-            "backgroundImg": "./assets/dialogue-with-rose.jpg",
-            "answers": {
-                "firstEntry": {
-                    "mainText": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla eu ex neque. In bibendum nulla erat, in mollis diam auctor sed. Etiam mattis sollicitudin blandit. In hac habitasse platea dictumst. Integer a elit accumsan, ornare sem quis, dapibus nisi. Aliquam ut dolor dignissim, semper ipsum ac, pellentesque nulla. Vivamus in."
-                }
-            },
-            "interactions": [
-                {
-                    "actions": [
-                        {
-                            "type": "goto",
-                            "target": "flowerView",
-                            "hoverCursor": "zoom-out"
-                        }
-                    ],
-                    "hidden": false,
-                    "location": {
-                        "description": {
-                            "bottomRightCorner": {
-                                "x": 150,
-                                "y": 150
-                            },
-                            "image": "./assets/back_icon.png",
-                            "topLeftCorner": {
-                                "x": 50,
-                                "y": 50
-                            }
-                        },
-                        "shape": "icon"
-                    }
-                }
-            ],
-            "startAnswer": "firstEntry"
         }
     },
     "startScene": "first",

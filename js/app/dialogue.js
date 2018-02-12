@@ -27,6 +27,7 @@ define([
                 'answers',
                 'interactions',
                 'startAnswer',
+                'shareOfScreen_percent',
             ],
             true,
             this.getName()
@@ -34,6 +35,7 @@ define([
 
         var name = data.name;
         var key = key;
+        this.shareOfScreen = parseFloat(data.shareOfScreen_percent)
 
         var interactions = [];
         var answers = [];
@@ -61,6 +63,23 @@ define([
             return data.backgroundImg;
         }
 
+        this.getFont = () => {
+            var bold = _.get(data, ['font', 'bold']);
+            var font = _.get(data, ['font', 'font']);
+            var size = _.get(data, ['font', 'size']);
+            var color = _.get(data, ['font', 'color']);
+
+            return _.merge(
+                this.parent.getFont(),
+                {
+                    fontFamily: font,
+                    fontSize: size ? size + "px" : undefined,
+                    fontWeight: bold,
+                    color: color
+                }
+            );
+        }
+
         var applyBackgroundImage = (image, renderer, callback) => {
             var $canvas = renderer.get$Canvas();
             var canvasContext = renderer.getContext();
@@ -68,7 +87,7 @@ define([
             var originalHeight = image.naturalHeight;
             var originalRatio = originalWidth / originalHeight * 1.0;
 
-            var fullHeight = $canvas.height();
+            var fullHeight = $canvas.height() * this.shareOfScreen / 100.0;
             var height = fullHeight;
             var fullWidth =  $canvas.width();
             var width = fullWidth;
@@ -100,6 +119,10 @@ define([
             renderer.setOffset(cornerX, cornerY);
 
             canvasContext.drawImage(image, cornerX, cornerY, width * resolution, height * resolution);
+            height = $canvas.height();
+            width = $canvas.width();
+            cornerX = 0;
+            cornerY = 0;
             renderer.setBackgroundDimensions(cornerX, cornerY, width * resolution, height * resolution);
             callback();
         }
