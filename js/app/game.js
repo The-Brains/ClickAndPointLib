@@ -54,6 +54,20 @@ define([
             return this.globalActions[actionName];
         }
 
+        this.getFont = () => {
+            var bold = _.get(this.sourceData, ['font', 'bold']) || "normal";
+            var font = _.get(this.sourceData, ['font', 'font']) || "Arial";
+            var size = _.get(this.sourceData, ['font', 'size']) || 26;
+            var color = _.get(this.sourceData, ['font', 'color']) || "black";
+
+            return {
+                fontFamily: font,
+                fontSize: size ? size + "px" : undefined,
+                fontWeight: bold,
+                color: color
+            };
+        }
+
         /**
         * Can be used by the editor to reload the edited data.
         */
@@ -240,6 +254,7 @@ define([
         }
 
         var resetCanvas = () => {
+            $('.temp-overlay').remove();
             var canvas = this.renderer.getCanvas();
             var context = this.renderer.getContext();
             context.clearRect(0, 0, canvas.width, canvas.height);

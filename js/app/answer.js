@@ -1,8 +1,10 @@
 define([
 	'lodash',
+	'jquery',
 	'../utility/check-data.js',
+	'./response.js',
 ],
-(_, CheckData) => {
+(_, $, CheckData, Response) => {
 	var Answer = function(parent, key, data) {
 		this.parent = parent;
 		var myself = self;
@@ -18,47 +20,44 @@ define([
 		CheckData.checkKeys(
 			data,
 			[
-				'mainText'
+				'mainText',
+				'responses',
 			],
 			true,
 			this.getName()
 		);
 
 		var key = key;
-		// answer can have their own "font" block or use the parent one of the default.
-		var bold = _.get(data, ['font', 'bold']) || _.get(this.parent.data, ['font', 'bold']) || "normal";
-		var font = _.get(data, ['font', 'font']) || _.get(this.parent.data, ['font', 'font']) || "Arial";
-		var size = (_.get(data, ['font', 'size']) || _.get(this.parent.data, ['font', 'size']) || 26);
-		var color = _.get(data, ['font', 'color']) || _.get(this.parent.data, ['font', 'color']) || "black";
-
 		var backgroundColor = _.get(data, 'backgroundColor') || _.get(this.parent.data, 'backgroundColor') || "white";
 
 		var npcText = data.mainText;
+		var lineWidth = 2;
+		var margin = 20;
 
-		function wrapText(context, text, x, y, maxWidth, lineHeight) {
-			var lineCount = 0;
-			var words = text.split(' ');
-			var line = '';
+		var responses = [];
 
-			for(var n = 0; n < words.length; n++) {
-				var testLine = line + words[n] + ' ';
-				var metrics = context.measureText(testLine);
-				var testWidth = metrics.width;
-				if (testWidth > maxWidth && n > 0) {
-					context.fillText(line, x, y);
-					lineCount += 1;
-					line = words[n] + ' ';
-					y += lineHeight;
+		this.getFont = () => {
+			var bold = _.get(data, ['font', 'bold']);
+			var font = _.get(data, ['font', 'font']);
+			var size = _.get(data, ['font', 'size']);
+			var color = _.get(data, ['font', 'color']);
+
+			return _.merge(
+				this.parent.getFont(),
+				{
+					fontFamily: font,
+					fontSize: size ? size + "px" : undefined,
+					fontWeight: bold,
+					color: color
 				}
-				else {
-					line = testLine;
-				}
-			}
-			context.fillText(line, x, y);
-			if (line !== '') {
-				lineCount += 1;
-			}
-			return lineCount;
+			);
+		}
+
+		var ensureResponses = () => {
+			responses = _.map(data.responses, (response, index) => {
+				return responses[index] || new Response(this, index, response);
+			});
+			return responses;
 		}
 
 		this.render = (renderer, mouse) => {
@@ -66,30 +65,67 @@ define([
 			var canvasContext = renderer.getContext();
 			var backgroundDimensions = renderer.getBackgroundDimensions();
 
-			var margin = 20;
-			var cornerX = backgroundDimensions.cornerX + margin;
-			var cornerY = (backgroundDimensions.height / 3 * 2);
+			var cornerX = backgroundDimensions.cornerX;
+			var cornerY = backgroundDimensions.height * this.parent.shareOfScreen / 100.0;
 			var maxWidth = backgroundDimensions.width - margin;
 			canvasContext.fillStyle = backgroundColor;
 			canvasContext.globalAlpha = 0.5;
-			canvasContext.strokeStyle = color;
-			canvasContext.lineWidth   = 2;
+			canvasContext.strokeStyle = "black";
+			canvasContext.lineWidth = lineWidth;
 			var rectX = backgroundDimensions.cornerX;
-			var rectY = cornerY - size - margin;
+			var rectY = cornerY;
 			var rectWidth =  backgroundDimensions.width - 0;
 			var rectHeight = backgroundDimensions.height - rectY + backgroundDimensions.cornerY;
 			canvasContext.fillRect(rectX, rectY, rectWidth, rectHeight);
 			canvasContext.globalAlpha = 1;
 			canvasContext.strokeRect(rectX, rectY, rectWidth, rectHeight);
 
-			canvasContext.fillStyle = color;
-			var canvasFont = `${bold} ${size}px ${font}`;
-			canvasContext.font = canvasFont
-			var lineUsed = wrapText(canvasContext, npcText, cornerX, cornerY, maxWidth, size);
-
-			// TODO: Draw possible responses.
+			renderText(renderer, backgroundDimensions);
 		}
+
+		var renderText = (renderer, backgroundDimensions) => {
+			var mainContainer = $('<div>', {
+				class: 'dialogue temp-overlay'
+			});
+			var cornerX = backgroundDimensions.cornerX;
+			var cornerY = backgroundDimensions.height * this.parent.shareOfScreen / 100.0;
+
+			var textAreaCornerY = cornerY + lineWidth;
+			var fontObject = this.getFont();
+			var cssObject = _.merge(
+				{
+					backgroundColor: "white",
+					width: (backgroundDimensions.width - margin * 2) + "px",
+					height: (backgroundDimensions.height - textAreaCornerY - margin * 2) + "px",
+					position: "absolute",
+					left: cornerX + "px",
+					top: textAreaCornerY + "px",
+					padding: margin + "px",
+				},
+				fontObject,
+				// TODO: Allow merge of completely custom CSS.
+			);
+			$(mainContainer).css(cssObject);
+
+			var mainNPCText = $('<p>', {
+				text: npcText,
+				class: 'dialogue-npcText',
+			});
+			mainContainer.append(mainNPCText);
+
+			var answersContainer = $('<div>', {});
+
+			_.forEach(responses, (response) => {
+				var content = response.toRender();
+				answersContainer.append(content);
+			});
+			mainContainer.append(answersContainer);
+
+			renderer.get$Canvas().parent().append(mainContainer);
+		}
+
+		responses = ensureResponses();
 	};
 
 	return Answer;
-})
+});
