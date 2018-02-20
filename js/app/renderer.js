@@ -23,10 +23,6 @@ define([
             return backgroundRatio;
         }
 
-        this.getBackgroundRatio = () => {
-            return backgroundRatio;
-        }
-
         this.setBackgroundRatio = (width, height) => {
             backgroundRatio.width = width;
             backgroundRatio.height = height;
