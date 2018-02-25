@@ -1,8 +1,9 @@
 define([
-],
-() => {
+    '../utility/retina.js',
+], (isRetina) => {
     var Renderer = function($canvas, canvasContext) {
         var myself = self;
+        var resolution = isRetina ? 2 : 1;
         var backgroundRatio = {
             width: 1,
             height: 1,
@@ -52,26 +53,30 @@ define([
             return canvasContext;
         }
 
-        this.convertCoordonateToBackground = (point) => {
+        this.convertCoordonateToBackground = (point, forDisplay) => {
+            var r = forDisplay ? resolution : 1;
             return {
-                x: point.x * backgroundRatio.width + offset.x,
-                y: point.y * backgroundRatio.height + offset.y,
+                x: point.x * backgroundRatio.width * r + offset.x,
+                y: point.y * backgroundRatio.height * r + offset.y,
             };
         }
 
-        this.convertBackgroundToCoordinate = (point) => {
+        this.convertBackgroundToCoordinate = (point, forDisplay) => {
+            var r = forDisplay ? resolution : 1;
             return {
-                x: (point.x - offset.x) / backgroundRatio.width,
-                y: (point.y - offset.y) / backgroundRatio.height,
+                x: (point.x - offset.x) / backgroundRatio.width / r,
+                y: (point.y - offset.y) / backgroundRatio.height/ r,
             };
         }
 
-        this.convertValueToBackground = (value) => {
-            return value * backgroundRatio.width;
+        this.convertValueToBackground = (value, forDisplay) => {
+            var r = forDisplay ? resolution : 1;
+            return value * backgroundRatio.width* r;
         }
 
-        this.convertBackgroundToValue = (value) => {
-            return value / backgroundRatio.width;
+        this.convertBackgroundToValue = (value, forDisplay) => {
+            var r = forDisplay ? resolution : 1;
+            return value / backgroundRatio.width/ r;
         }
 
         this.setOffset = (offsetX, offsetY) => {

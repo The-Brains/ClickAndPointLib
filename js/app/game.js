@@ -263,6 +263,10 @@ define([
         }
 
         var changeScene = (sceneKey) => {
+            if(!this.scenes[sceneKey]) {
+                this.scenes[sceneKey] = new Scene(this, sceneKey, this.sourceData.scenes[sceneKey]);
+            }
+
             this.isValidSceneKey(sceneKey, true);
 
             this.currentScene = this.scenes[sceneKey];
@@ -290,6 +294,15 @@ define([
                 render: true,
             });
         }
+
+        var dropItem = (itemKey) => {
+            this.isValidItemKey(itemKey, true);
+            this.items[itemKey].owned = false;
+            this.mouse.updateCursor('default');
+            return Promise.resolve({
+                render: true,
+            });
+        };
 
         var dropItem = (itemKey) => {
             this.isValidItemKey(itemKey, true);
