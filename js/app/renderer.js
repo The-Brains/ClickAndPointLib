@@ -56,16 +56,16 @@ define([
         this.convertCoordonateToBackground = (point, forDisplay) => {
             var r = forDisplay ? resolution : 1;
             return {
-                x: point.x * backgroundRatio.width * r + offset.x,
-                y: point.y * backgroundRatio.height * r + offset.y,
+                x: (point.x * backgroundRatio.width + offset.x / resolution)* r,
+                y: (point.y * backgroundRatio.height + offset.y / resolution)* r,
             };
         }
 
         this.convertBackgroundToCoordinate = (point, forDisplay) => {
             var r = forDisplay ? resolution : 1;
             return {
-                x: (point.x - offset.x) / backgroundRatio.width / r,
-                y: (point.y - offset.y) / backgroundRatio.height/ r,
+                x: (point.x / r - offset.x / resolution) / backgroundRatio.width,
+                y: (point.y / r - offset.y / resolution) / backgroundRatio.height,
             };
         }
 
