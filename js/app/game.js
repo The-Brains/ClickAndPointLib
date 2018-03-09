@@ -39,6 +39,12 @@ define([
         this.items = {};
         this.variables = {};
         this.dialogues = {};
+        this.editor = {
+            active: false,
+            render: ()=>{},
+            onSceneChange: ()=>{},
+            initialize: ()=>{},
+        };
 
         this.getName = () => {
             return 'MainGame';
@@ -73,6 +79,22 @@ define([
         */
         this.reloadGame = (data) => {
             this.sourceData = data;
+
+            this.editor.setInterface({
+                gotoScene: function(scene) {
+                    return changeScene(scene).then((output) => {
+                        return render();
+                    });
+                },
+                data: this.sourceData,
+                renderer: this.renderer,
+                render: render,
+                takeItem: takeItem,
+                dropItem: dropItem,
+                isItemOwned: this.isItemOwned,
+                updateVariable: updateVariable,
+                getVariable: this.getVariable,
+            });
 
             CheckData.checkKeys(
                 this.sourceData,
@@ -160,10 +182,14 @@ define([
 
                 return changeScene(this.sourceData.startScene)
                 .then((output) => {
-                    return render();
+                    return render(()=> {
+                        this.editor.render();
+                    });
                 })
                 .then(() => {
-                    $(window).resize(_.debounce(render, 500, {
+                    $(window).resize(_.debounce(()=> {
+                        render().then();
+                    }, 500, {
                         maxWait: 1000,
                     }));
 
@@ -174,6 +200,7 @@ define([
                         $canvas.mousedown(handleClickDown);
                         $canvas.mouseup(handleClickUp);
                     }
+                    this.editor.render();
                 });
             });
         };
@@ -394,11 +421,16 @@ define([
 
                 if (needRender) {
                     return render();
+                } else {
+                    this.editor.onSceneChange(this.currentScene.key);
                 }
 
                 return Promise.resolve();
+            })
+            .then(() => {
+                this.editor.onSceneChange(this.currentScene.key);
             });
-        }
+        };
 
         var handleClickUp = (e) => {
             e.preventDefault();
@@ -407,8 +439,12 @@ define([
             updateMousePosition(e);
             this.mouse.registerRelease();
             return this.currentScene.handleClickUp(this.renderer, this.mouse);
+        };
+
+        this.setEditor = (editor) => {
+            this.editor = editor;
         }
-    }
+    };
 
     return Game;
 });
